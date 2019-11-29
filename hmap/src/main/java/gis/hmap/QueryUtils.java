@@ -815,6 +815,7 @@ import java.util.List;
         QueryParameter queryParameter = new QueryParameter();
         sqlParameters.queryParameter = queryParameter;
 
+        Log.e("queryPark", Common.getHost() + Common.GLOBALDATA_URL());
         GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.GLOBALDATA_URL());
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
@@ -828,14 +829,21 @@ import java.util.List;
         if (parks != null && parks.features != null) {
             for (int i=0; i<parks.featureCount; i++) {
                 Feature park = parks.features[i];
-                Point2D[] point2DS = getPiontsFromGeometry(park.geometry).toArray(new Point2D[0]);
-                Point2D point2D = new Point2D();
-                point2D.x = lng;
-                point2D.y = lat;
-                if (isInPolygon(point2D, point2DS)) {
-                    String[] result = new String[] { "", "", "" };
+                double west=0, north=0, east=0, sourth=0;
+                for (int t = 0; t < park.fieldNames.length; t++) {
+                    if (park.fieldNames[t].equalsIgnoreCase("SMSDRIW"))
+                        west = Double.parseDouble(park.fieldValues[t]);
+                    else if (park.fieldNames[t].equalsIgnoreCase("SMSDRIN"))
+                        north = Double.parseDouble(park.fieldValues[t]);
+                    else if (park.fieldNames[t].equalsIgnoreCase("SMSDRIE"))
+                        east = Double.parseDouble(park.fieldValues[t]);
+                    else if (park.fieldNames[t].equalsIgnoreCase("SMSDRIS"))
+                        sourth = Double.parseDouble(park.fieldValues[t]);
+                }
+                if (lng <= east && lng >= west && lat <= north && lat >= sourth) {
+                    String[] result = new String[]{"", "", ""};
                     int filled = 0;
-                    for (int j=0; j<park.fieldNames.length; j++) {
+                    for (int j = 0; j < park.fieldNames.length; j++) {
                         if (park.fieldNames[j].equalsIgnoreCase(Common.parkIdName())) {
                             result[0] = park.fieldValues[j];
                             filled++;
@@ -882,14 +890,22 @@ import java.util.List;
         return (nCross % 2 == 1);
     }
 
-    public static Feature[] queryDatasetAll(String target) {
+    public static Feature[] queryDatasetAll(String target, boolean global) {
         GetFeaturesBySQLParameters sqlParameters = new GetFeaturesBySQLParameters();
-        sqlParameters.datasetNames = new String[] { Common.parkId()+":"+target };
+        if (global)
+            sqlParameters.datasetNames = new String[] { Common.globalParkId()+":"+target };
+        else
+            sqlParameters.datasetNames = new String[] { Common.parkId()+":"+target };
         sqlParameters.toIndex = 99999;
         QueryParameter queryParameter = new QueryParameter();
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        String dataUrl;
+        if (global)
+            dataUrl = Common.GLOBALDATA_URL();
+        else
+            dataUrl = Common.DATA_URL();
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
         try {

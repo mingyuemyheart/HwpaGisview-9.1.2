@@ -17,24 +17,24 @@ import android.widget.Toast;
  * Created by Ryan on 2018/10/16.
  */
 
-public class popView extends LinearLayout {
+public class PopView extends LinearLayout {
 
-    public popView(Context context) {
+    public PopView(Context context) {
         super(context);
         init(context, null, 0, 0);
     }
 
-    public popView(Context context, AttributeSet attrs) {
+    public PopView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs, 0,0);
     }
 
-    public popView(Context context, AttributeSet attrs, int defStyle) {
+    public PopView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context, attrs, defStyle,0);
     }
 
-    public popView(Context context, AttributeSet attrs, int defStyle, int defStyleRes) {
+    public PopView(Context context, AttributeSet attrs, int defStyle, int defStyleRes) {
         super(context, attrs, defStyle, defStyleRes);
         init(context, attrs, defStyle, defStyleRes);
     }

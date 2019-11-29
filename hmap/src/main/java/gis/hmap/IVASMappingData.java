@@ -10,8 +10,12 @@ public class IVASMappingData {
     public String[] floorList;
     public String ivasBuildingId;
     public int[] ivasFloorList;
+    public String[] fields;
+    public String[] values;
 
     public IVASMappingData(Feature feature, boolean useTest) {
+        fields = feature.fieldNames;
+        values = feature.fieldValues;
         for (int i=0; i<feature.fieldNames.length; i++) {
             if (feature.fieldNames[i].equalsIgnoreCase("SMX"))
                 lng = Double.parseDouble(feature.fieldValues[i]);
@@ -32,7 +36,7 @@ public class IVASMappingData {
                 if (lst != null) {
                     ivasFloorList = new int[lst.length];
                     for (int j = 0; j < lst.length; j++)
-                        ivasFloorList[i] = Integer.parseInt(lst[i]);
+                        ivasFloorList[j] = Integer.parseInt(lst[j]);
                 }
             }
         }

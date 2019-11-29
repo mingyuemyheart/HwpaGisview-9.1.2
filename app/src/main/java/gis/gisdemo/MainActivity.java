@@ -1,9 +1,8 @@
 package gis.gisdemo;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -13,43 +12,38 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
-import java.util.Random;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import gis.hmap.BuildingEvent;
+import gis.hmap.BuildingListener;
 import gis.hmap.CalculateRouteListener;
+import gis.hmap.FlashMarker;
+import gis.hmap.GeneralMarker;
 import gis.hmap.GeoLocation;
 import gis.hmap.GeoServiceCallback;
 import gis.hmap.GisView;
 import gis.hmap.HeatPoint;
-import gis.hmap.BuildingEvent;
-import gis.hmap.BuildingListener;
-import gis.hmap.FlashMarker;
-import gis.hmap.GeneralMarker;
+import gis.hmap.IVASMappingData;
+import gis.hmap.IVASMappingListener;
 import gis.hmap.IndoorCallback;
 import gis.hmap.LocationEvent;
 import gis.hmap.LocationListener;
@@ -57,7 +51,6 @@ import gis.hmap.MapEvent;
 import gis.hmap.MapListener;
 import gis.hmap.MapLoadedEvent;
 import gis.hmap.MapLoadedListener;
-import gis.hmap.Marker;
 import gis.hmap.MarkerEvent;
 import gis.hmap.MarkerListener;
 import gis.hmap.ModelEvent;
@@ -74,7 +67,7 @@ import gis.hmap.ZoomToIndoorEvent;
 import gis.hmap.ZoomToIndoorListener;
 
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends Activity
         implements NavigationView.OnNavigationItemSelectedListener,
         MarkerListener, BuildingListener, ModelListener, ZoomListener, MapListener, IndoorCallback,
         LocationListener, GeoServiceCallback, QueryCallback, ZoomToIndoorListener,
@@ -106,25 +99,28 @@ public class MainActivity extends AppCompatActivity
     private String markerId;
     private boolean permissionflag = false; //
     private Handler mainHandler= new Handler();
-    private  Object popup = null;
+    private Object popup = null;
     private ArrayList<Object> popups = new ArrayList<Object>();
     GisView gisView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        GisView.enableAutoClearCache(true);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         gisView = (GisView) findViewById(R.id.gisView);
+//        gisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json");//华为平安园区
 //        gisView.setGisServer("http://apigw-beta.huawei.com/api");
 //        gisView.setGisServer("http://42.202.130.191:8090/iserver/services");
-        gisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json");
 //        gisView.setGisServer("https://42.202.130.191:443/iserver");
 //        gisView.setGisServer("http://iserver.raytue.com:8090/iserver");
 //        gisView.setGisServer("http://192.168.1.112:8090/iserver/services");
 //        gisView.setGisServer("http://10.0.1.47:8090/iserver/services");
 //        gisView.setRTLSServer("http://10.240.155.52:18889");
-        setSupportActionBar(toolbar);
         gisView.addMapLoadedListener(this);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -136,7 +132,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-//        gisView.enableAutoClearCache(true);
+        gisView.decodeLocLocation("b6dd2707-58e4-46a3-b0a6-3bbb1b97a44c", 1);
+
 //        gisView.loadMap(2, new double[] {36.65221619825378, 117.16909751245657}, "jinanQxiangmu", "jinanQxiangmu");
 //        gisView.loadMap(5, new double[]{22.6573017046106460, 114.0576151013374200}, "BTYQ", "BTYQ");
         gisView.loadMap(5, new double[]{22.6573017046106460, 114.0576151013374200});
@@ -209,7 +206,6 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
-            permissionflag = grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED;
         }
         initLoc();
     }
@@ -283,7 +279,7 @@ public class MainActivity extends AppCompatActivity
 
         //加载地图
         if (id == R.id.loadMap) {
-            gisView.loadMap(2, new double[] {36.65221619825378, 117.16909751245657} );
+            gisView.loadMap(2, new double[] {22.6573017046106460,114.0576151013374200});
         }
         if (id == R.id.loadMap2) {
             gisView.loadMap(5, new double[] {22.6573017046106460,114.0576151013374200});
@@ -298,7 +294,8 @@ public class MainActivity extends AppCompatActivity
 
         }
         else if(id == R.id.encodeAddress){  //查询经纬度对应地名
-            gisView.getAddressOfLocation(117.16909751245657,36.65221619825378,0.0005,5,this);
+//            gisView.getAddressOfLocation(117.16909751245657,36.65221619825378,0.0005,5,this);
+            gisView.getAddressOfLocation(114.0576151013374200,22.6573017046106460, this);
             Log.d("GisView", "location ok");
         } else if(id == R.id.decodeAddress){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -719,10 +716,10 @@ public class MainActivity extends AppCompatActivity
             GisView.removeLocateListener(this);
         }
         else if (id == R.id.startloc) {
-            GisView.startLocate();
+            gisView.startLocate();
         }
         else if (id == R.id.stoploc) {
-            GisView.stopLocate();
+            gisView.stopLocate();
         }
         else if (id == R.id.getBuilding) {
             gisView.getBuldingInfo("BTYQ", "J03", this);

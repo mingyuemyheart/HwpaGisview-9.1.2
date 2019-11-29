@@ -24,20 +24,20 @@ import java.util.logging.SimpleFormatter;
  * Created by Ryan on 2018/10/18.
  */
 
-class Common {
+public class Common {
     private static Common _instance = null;
-    private String host = "http://10.0.1.45:8090/iserver";
+    private String host = "http://192.168.1.100:8090/iserver";
     private String rtlsLicenseHost = "https://10.240.155.52:18889";
     private String workSpace = "china400";
     private String parkId = "China";
     private List<String> extParam = new ArrayList<>();
+    private String parkIdName = "ID";
+    private String parkCenterNameX = "ParkX";
+    private String parkCenterNameY = "ParkY";
     private Logger logger = null;
     private String globalWorkSpace = "HWYQ";
     private String globalParkId = "HWYQ";
     private String globalDataset = "boundary";
-    private String parkIdName = "ID";
-    private String parkCenterNameX = "ParkX";
-    private String parkCenterNameY = "ParkY";
 
     private Common() { _instance = this; }
 
@@ -261,6 +261,15 @@ class Common {
         else
             return GEO_DECODE.replace("{workSpace}", _instance.workSpace);
     }
+
+    //HWYQ是虚拟园区，为获取当前园区信息所用
+    public static String GEO_DECODE_HWYQURL() {
+        if (_instance == null)
+            return "";
+        else
+            return GEO_DECODE.replace("{workSpace}", _instance.globalWorkSpace);
+    }
+
     //Rtls
     private static String LicenseServer  = "/garden.guide/guide/requestguide";
     //Roma

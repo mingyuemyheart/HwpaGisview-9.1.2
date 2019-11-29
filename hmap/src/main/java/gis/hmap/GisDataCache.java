@@ -47,7 +47,7 @@ final class GisDataCache {
     private boolean hasError = false;
     private HashMap<String, Feature> buildingCache = new HashMap<>();
     private List<String> basementList = new Vector<>();
-    private List<IVASMappingData> iVasMapping = new ArrayList<>();
+    private static List<IVASMappingData> iVasMapping = new ArrayList<>();
     private List<BuildingConvertMappingData> buildingMapping = new ArrayList<>();
 
     private GisDataCache(Context context, MapCacheListener listener) {
@@ -71,16 +71,25 @@ final class GisDataCache {
         }
     }
 
-    public void initIVASMapping(boolean test) {
-        final boolean useTest = test;
+    public static void initIVASMapping(final boolean test, final IVASMappingListener callback) {
+        if (!test) {
+            return;
+        }
         Common.fixedThreadPool.execute(new Runnable() {
             @Override
             public void run() {
-                Feature[] features = QueryUtils.queryDatasetAll("IVAS");
+                Feature[] features = QueryUtils.queryDatasetAll("IVAS", true);
                 if (features != null) {
                     for (Feature feature : features) {
-                        IVASMappingData data = new IVASMappingData(feature, useTest);
+                        IVASMappingData data = new IVASMappingData(feature, test);
                         iVasMapping.add(data);
+                    }
+                }
+                if (callback != null) {
+                    if (iVasMapping.size() > 0) {
+                        callback.onIVASMappingSuccess(iVasMapping);
+                    } else {
+                        callback.onIVASMappingFailed("暂无查询数据");
                     }
                 }
             }
@@ -99,7 +108,7 @@ final class GisDataCache {
     }
 
     public void initBuildingConvert() {
-        Feature[] features = QueryUtils.queryDatasetAll("buildConversion");
+        Feature[] features = QueryUtils.queryDatasetAll("buildConversion", false);
         if (features != null) {
             for (Feature feature : features) {
                 BuildingConvertMappingData data = new BuildingConvertMappingData(feature);

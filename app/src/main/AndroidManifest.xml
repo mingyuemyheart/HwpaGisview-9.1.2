@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL"/>
 
     <application
-        android:name=".startApp"
+        android:name=".MyApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -29,20 +29,16 @@
         android:theme="@style/AppTheme"
         tools:replace="name">
         <activity
-            android:name=".BlankActivity"
-            android:label="@string/title_activity_blank"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".MainActivity">
 
         </activity>
 
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="c76836bf037306ac0ac51266ad4f7357" />
+            android:value="56b6d61eea075d18c7806c31e9b103c0" />
 
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".BlankActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
