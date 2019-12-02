@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single" android:id="@+id/mapmenu" >
+    <group
+        android:id="@+id/mapmenu"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/loadMap"
             android:icon="@drawable/ic_menu_slideshow"
@@ -26,7 +28,9 @@
             android:title="获取地图中心" />
 
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/addressenu">
+    <group
+        android:id="@+id/addressenu"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/encodeAddress"
             android:icon="@drawable/ic_menu_slideshow"
@@ -74,7 +78,9 @@
             android:title="查询数据" />
 
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/zoommenu">
+    <group
+        android:id="@+id/zoommenu"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/zoom1"
             android:icon="@drawable/ic_menu_slideshow"
@@ -101,7 +107,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="显示室内级别=4" />
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/iconmenu">
+    <group
+        android:id="@+id/iconmenu"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/addMarker"
             android:icon="@drawable/ic_menu_slideshow"
@@ -132,7 +140,9 @@
             android:title="图标移动" />
 
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/infowindow">
+    <group
+        android:id="@+id/infowindow"
+        android:checkableBehavior="single">
 
         <item
             android:id="@+id/addpopup"
@@ -144,7 +154,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="关闭信息框" />
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/layershow">
+    <group
+        android:id="@+id/layershow"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/loadF1"
             android:icon="@drawable/ic_menu_slideshow"
@@ -208,7 +220,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="取消模型高亮" />
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/heatmapmenu">
+    <group
+        android:id="@+id/heatmapmenu"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/drawRoute"
             android:icon="@drawable/ic_menu_slideshow"
@@ -230,7 +244,9 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="清除热力图" />
     </group>
-    <group android:checkableBehavior="single"  android:id="@+id/eventmenu">
+    <group
+        android:id="@+id/eventmenu"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/addmkrevent"
             android:icon="@drawable/ic_menu_slideshow"

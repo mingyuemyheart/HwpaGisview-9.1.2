@@ -24,7 +24,6 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -42,8 +41,6 @@ import gis.hmap.GeoLocation;
 import gis.hmap.GeoServiceCallback;
 import gis.hmap.GisView;
 import gis.hmap.HeatPoint;
-import gis.hmap.IVASMappingData;
-import gis.hmap.IVASMappingListener;
 import gis.hmap.IndoorCallback;
 import gis.hmap.LocationEvent;
 import gis.hmap.LocationListener;
@@ -65,7 +62,6 @@ import gis.hmap.ZoomEvent;
 import gis.hmap.ZoomListener;
 import gis.hmap.ZoomToIndoorEvent;
 import gis.hmap.ZoomToIndoorListener;
-
 
 public class MainActivity extends Activity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -92,23 +88,17 @@ public class MainActivity extends Activity
             "android.permission.VIBRATE",
             "android.permission.WAKE_LOCK"};
 
-    private Handler mHandler;
-
-
     private int cnt = 0;
     private String markerId;
     private boolean permissionflag = false; //
     private Handler mainHandler= new Handler();
-    private Object popup = null;
-    private ArrayList<Object> popups = new ArrayList<Object>();
+    private ArrayList<Object> popups = new ArrayList<>();
     GisView gisView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        GisView.enableAutoClearCache(true);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -218,28 +208,6 @@ public class MainActivity extends Activity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.main, menu);
-        return false;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

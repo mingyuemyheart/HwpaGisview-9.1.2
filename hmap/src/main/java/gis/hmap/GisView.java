@@ -111,7 +111,7 @@ public class GisView extends RelativeLayout
     protected ZoomToIndoorListener mZoomToIndoorListener;
     protected String defaultZoomIndoor = "F01";
     protected CalculateRouteListener mCalculateRouteListener;
-    protected boolean autoClearCachedTiles = false;
+    protected static boolean autoClearCachedTiles = false;
     protected MapCacheListener mMapCacheListener;
     protected MapLoadedListener mMapLoadedListener;
     protected List<MapMoveListener> mMapMoveListener;
@@ -1123,7 +1123,7 @@ public class GisView extends RelativeLayout
         }
     }
 
-    public void enableAutoClearCache(boolean enable) {
+    public static void enableAutoClearCache(boolean enable) {
         autoClearCachedTiles = enable;
     }
 
