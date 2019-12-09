@@ -2210,7 +2210,7 @@ public class GisView extends RelativeLayout
 
     /**
      * 加载ivas
-     * @param test
+     * @param test true获取测试数据，false获取正式数据
      */
     public static void setLocDecoder(boolean test, IVASMappingListener callback) {
         GisDataCache.initIVASMapping(test, callback);

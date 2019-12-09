@@ -58,6 +58,8 @@
 
         <activity android:name=".MainActivity" />
 
+        <activity android:name=".MainActivity2" />
+
     </application>
 
 </manifest>

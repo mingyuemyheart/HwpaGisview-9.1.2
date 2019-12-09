@@ -72,16 +72,14 @@ final class GisDataCache {
     }
 
     public static void initIVASMapping(final boolean test, final IVASMappingListener callback) {
-        if (!test) {
-            return;
-        }
+        final boolean useTest = test;
         Common.fixedThreadPool.execute(new Runnable() {
             @Override
             public void run() {
                 Feature[] features = QueryUtils.queryDatasetAll("IVAS", true);
                 if (features != null) {
                     for (Feature feature : features) {
-                        IVASMappingData data = new IVASMappingData(feature, test);
+                        IVASMappingData data = new IVASMappingData(feature, useTest);
                         iVasMapping.add(data);
                     }
                 }
