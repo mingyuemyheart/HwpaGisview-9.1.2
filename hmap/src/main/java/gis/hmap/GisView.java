@@ -1589,69 +1589,69 @@ public class GisView extends RelativeLayout
                 } else
                     QueryUtils.queryBasementMap(Common.parkId(), floorid, handler);
             } else {
-                Feature buildingFeature = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getBuilding(realBuildingId);
-                Feature[] floorFeatures = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getFloor(realBuildingId, floorid);
-                if (floorFeatures != null && floorFeatures.length > 0 ) {
-                    List<List<Point2D>> buildingGeometry = null;
-                    if (buildingFeature != null && buildingFeature.geometry != null) {
-                        buildingGeometry = new ArrayList<>();
-                        int index = 0;
-                        for (int i=0; i<buildingFeature.geometry.parts.length; i++) {
-                            List<Point2D> point2DS = new ArrayList<>();
-                            for (int j=0; j<buildingFeature.geometry.parts[i]; j++) {
-                                Point2D point2D = new Point2D();
-                                point2D.x = buildingFeature.geometry.points[index].x;
-                                point2D.y = buildingFeature.geometry.points[index].y;
-                                point2DS.add(point2D);
-                                index++;
-                            }
-                            buildingGeometry.add(point2DS);
-                        }
-                    }
-                    List<ModelData> rooms = new ArrayList<>();
-                    for (Feature feature : floorFeatures) {
-                        if (feature == null)
-                            continue;
-                        if (feature.geometry == null)
-                            continue;
-
-                        HashMap<String, String> info = new HashMap<>();
-                        for (int i=0; i<feature.fieldNames.length; i++)
-                            info.put(feature.fieldNames[i], feature.fieldValues[i]);
-                        info.put("FLOORID", floorid);
-                        String key = String.format("%s.%s.%s", realBuildingId, floorid, info.get("SMID"));
-                        List<List<Point2D>> geometry = new ArrayList<>();
-                        int index = 0;
-                        for (int i=0; i<feature.geometry.parts.length; i++) {
-                            List<Point2D> point2DS = new ArrayList<>();
-                            for (int j=0; j<feature.geometry.parts[i]; j++) {
-                                Point2D point2D = new Point2D();
-                                point2D.x = feature.geometry.points[index].x;
-                                point2D.y = feature.geometry.points[index].y;
-                                point2DS.add(point2D);
-                                index++;
-                            }
-                            geometry.add(point2DS);
-                        }
-                        if (feature.geometry.type == GeometryType.REGION) {
-                            ModelData room = new ModelData(key, null, geometry, info);
-                            rooms.add(room);
-                        } else {
-                            ModelData room = new ModelData(key, geometry, null, info);
-                            rooms.add(room);
-                        }
-                    }
-                    IndoorMapData indoorMapData = new IndoorMapData(
-                            realBuildingId,
-                            floorid,
-                            buildingGeometry,
-                            buildingGeometry != null ? buildingFeature.geometry.getBounds() : null,
-                            rooms);
-                    Message msg = new Message();
-                    msg.obj = indoorMapData;
-                    msg.what = Common.QUERY_INDOOR_MAP;
-                    handler.sendMessage(msg);
-                } else
+//                Feature buildingFeature = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getBuilding(realBuildingId);
+//                Feature[] floorFeatures = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getFloor(realBuildingId, floorid);
+//                if (floorFeatures != null && floorFeatures.length > 0 ) {
+//                    List<List<Point2D>> buildingGeometry = null;
+//                    if (buildingFeature != null && buildingFeature.geometry != null) {
+//                        buildingGeometry = new ArrayList<>();
+//                        int index = 0;
+//                        for (int i=0; i<buildingFeature.geometry.parts.length; i++) {
+//                            List<Point2D> point2DS = new ArrayList<>();
+//                            for (int j=0; j<buildingFeature.geometry.parts[i]; j++) {
+//                                Point2D point2D = new Point2D();
+//                                point2D.x = buildingFeature.geometry.points[index].x;
+//                                point2D.y = buildingFeature.geometry.points[index].y;
+//                                point2DS.add(point2D);
+//                                index++;
+//                            }
+//                            buildingGeometry.add(point2DS);
+//                        }
+//                    }
+//                    List<ModelData> rooms = new ArrayList<>();
+//                    for (Feature feature : floorFeatures) {
+//                        if (feature == null)
+//                            continue;
+//                        if (feature.geometry == null)
+//                            continue;
+//
+//                        HashMap<String, String> info = new HashMap<>();
+//                        for (int i=0; i<feature.fieldNames.length; i++)
+//                            info.put(feature.fieldNames[i], feature.fieldValues[i]);
+//                        info.put("FLOORID", floorid);
+//                        String key = String.format("%s.%s.%s", realBuildingId, floorid, info.get("SMID"));
+//                        List<List<Point2D>> geometry = new ArrayList<>();
+//                        int index = 0;
+//                        for (int i=0; i<feature.geometry.parts.length; i++) {
+//                            List<Point2D> point2DS = new ArrayList<>();
+//                            for (int j=0; j<feature.geometry.parts[i]; j++) {
+//                                Point2D point2D = new Point2D();
+//                                point2D.x = feature.geometry.points[index].x;
+//                                point2D.y = feature.geometry.points[index].y;
+//                                point2DS.add(point2D);
+//                                index++;
+//                            }
+//                            geometry.add(point2DS);
+//                        }
+//                        if (feature.geometry.type == GeometryType.REGION) {
+//                            ModelData room = new ModelData(key, null, geometry, info);
+//                            rooms.add(room);
+//                        } else {
+//                            ModelData room = new ModelData(key, geometry, null, info);
+//                            rooms.add(room);
+//                        }
+//                    }
+//                    IndoorMapData indoorMapData = new IndoorMapData(
+//                            realBuildingId,
+//                            floorid,
+//                            buildingGeometry,
+//                            buildingGeometry != null ? buildingFeature.geometry.getBounds() : null,
+//                            rooms);
+//                    Message msg = new Message();
+//                    msg.obj = indoorMapData;
+//                    msg.what = Common.QUERY_INDOOR_MAP;
+//                    handler.sendMessage(msg);
+//                } else
                     QueryUtils.queryIndoorMap(Common.parkId() + ":Buildings", realBuildingId, floorid, handler);
             }
         }
@@ -1745,6 +1745,7 @@ public class GisView extends RelativeLayout
                             ov.setShowPoints(false);
                             ov.setData(points);
                             ov.setKey(keyvalue + smId);
+                            ov.setZIndex(-1);
                             ovls.add(ov);
                             mapView.getOverlays().add(ov);
                         }
@@ -2497,6 +2498,7 @@ public class GisView extends RelativeLayout
             if (needNewOverlay) {
                 DrawableOverlay floorOverlay = new DrawableOverlay();
                 floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
+                floorOverlay.setZIndex(-1);
                 ovls.add(floorOverlay);
                 mapView.getOverlays().add(floorOverlay);
             } else {
