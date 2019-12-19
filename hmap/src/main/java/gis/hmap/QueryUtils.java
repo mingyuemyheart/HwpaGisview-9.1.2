@@ -117,14 +117,12 @@ import java.util.List;
 
             GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
-            Log.i("--indoor", "indoor begin");
             sqlService.process(sqlParameters, listener);
             try {
                 listener.waitUntilProcessed();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.i("--indoor", "indoor end");
 
             List<List<Point2D>> buildingGeometry = null;
             Rectangle2D buildingBounds = null;
@@ -159,24 +157,23 @@ import java.util.List;
                     }
                 }
             }
-
             sqlParameters.datasetNames = new String[] { Common.parkId()+":"+florid };
             sqlParameters.queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
-
-            Log.i("--indoor", "indoor begin");
             sqlService.process(sqlParameters, listener);
             try {
                 listener.waitUntilProcessed();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.i("--indoor", "indoor end");
 
             List<ModelData> rooms = null;
             GetFeaturesResult floor = listener.getReult();
             if (floor != null && floor.features != null) {
                 rooms = new ArrayList<>();
                 for (Feature feature : floor.features) {
+                    for (int i = 0; i < feature.fieldValues.length; i++) {
+                        Log.e("QueryIndoorMapRunnable", feature.fieldNames[i]+"---"+feature.fieldValues[i]);
+                    }
                     Geometry geometry = feature.geometry;
                     List<List<Point2D>> roomPoints = new ArrayList<>();
                     List<Point2D> geoPoints = getPiontsFromGeometry(geometry);
@@ -201,15 +198,12 @@ import java.util.List;
             }
 
             sqlParameters.datasetNames = new String[] { Common.parkId()+":"+florid+"_LINE" };
-
-            Log.i("--indoor", "indoor begin");
             sqlService.process(sqlParameters, listener);
             try {
                 listener.waitUntilProcessed();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.i("--indoor", "indoor end");
 
             floor = listener.getReult();
             if (floor != null && floor.features != null) {

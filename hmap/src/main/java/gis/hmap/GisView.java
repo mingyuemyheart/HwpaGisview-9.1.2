@@ -38,8 +38,6 @@ import com.supermap.android.maps.MapView;
 import com.supermap.android.maps.Overlay;
 import com.supermap.android.maps.Point2D;
 import com.supermap.android.maps.PolygonOverlay;
-import com.supermap.services.components.commontypes.Feature;
-import com.supermap.services.components.commontypes.GeometryType;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -59,17 +57,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
+public class GisView extends RelativeLayout implements Overlay.OverlayTapListener, MapView.MapViewEventListener, AMapLocationListener {
 
-/**
- * TODO: document your custom view class.
- */
-public class GisView extends RelativeLayout
-        implements Overlay.OverlayTapListener, MapView.MapViewEventListener, AMapLocationListener {
-    public static  String TAG = "GISView";
+    public static String TAG = "GisView-";
+
+    private boolean logEnable = false;
+    public void setLogEnable(boolean logEnable) {
+        this.logEnable = logEnable;
+    }
 
     private static final String calculatdRouteKey = "[calculatdRoute]";
     private static final String indoorKeyTemplate = "indoor[building:%s]";
@@ -107,9 +107,9 @@ public class GisView extends RelativeLayout
     protected int maxZoomLevel = 5;
     protected static HashMap<String, String> floorMapper;
     protected int lastZoomLevel = -1;
-    protected int indoorZoomLevel = 0;
-    protected ZoomToIndoorListener mZoomToIndoorListener;
-    protected String defaultZoomIndoor = "F01";
+    protected int indoorZoomLevel = 0;//室内地图默认缩放值
+    protected ZoomToIndoorListener mZoomToIndoorListener;//室内地图缩放事件
+    protected String defaultZoomIndoor = "F01";//室内地图默认楼层
     protected CalculateRouteListener mCalculateRouteListener;
     protected static boolean autoClearCachedTiles = false;
     protected MapCacheListener mMapCacheListener;
@@ -120,6 +120,7 @@ public class GisView extends RelativeLayout
     //声明AMapLocationClient类对象
     public AMapLocationClient mLocationClient = null;
     protected static boolean isLocatorRunning = false;
+    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
 
     public GisView(Context context) {
         super(context);
@@ -143,19 +144,15 @@ public class GisView extends RelativeLayout
 
     @Override
     public void onLocationChanged(AMapLocation amapLocation) {
-        if (amapLocation.getErrorCode() == 0) {
+        if (amapLocation.getErrorCode() == AMapLocation.LOCATION_SUCCESS) {
             if (!BestLocation.isIndoorValidate()) {
                 double lat = amapLocation.getLatitude();
                 double lng = amapLocation.getLongitude();
-                if (amapLocation.getCoordType() == AMapLocation.COORD_TYPE_GCJ02) {
+                if (amapLocation.getCoordType().equals(AMapLocation.COORD_TYPE_GCJ02)) {
                     double[] res = CoordsHelper.gcj02_To_Gps84(lat, lng);
                     lat = res[0]; lng = res[1];
                 }
-                BestLocation.updateGlobal(
-                        lat,
-                        lng,
-                        amapLocation.getAddress(),
-                        amapLocation.getTime());
+                BestLocation.updateGlobal(lat, lng, amapLocation.getAddress(), amapLocation.getTime());
                 if (amapLocation.getBearing() != 0.0)
                     BestLocation.getInstance().direction = amapLocation.getBearing();
                 GeoLocation p = getMyLocation();
@@ -176,11 +173,10 @@ public class GisView extends RelativeLayout
                     }
                 }
             }
-        }else {
-            //定位失败时，可通过ErrCode（错误码）信息来确定失败的原因，errInfo是错误信息，详见错误码表。
-            Log.e("AmapError","location Error, ErrCode:"
-                    + amapLocation.getErrorCode() + ", errInfo:"
-                    + amapLocation.getErrorInfo());
+        } else {
+            if (logEnable) {
+                Log.e(TAG+"onLocationChanged","errCode:" + amapLocation.getErrorCode() + ",errInfo:" + amapLocation.getErrorInfo());
+            }
         }
     }
 
@@ -188,7 +184,7 @@ public class GisView extends RelativeLayout
      * 采用最好的方式获取定位信息
      */
     public GeoLocation getMyLocation() {
-        GeoLocation p = null;
+        GeoLocation p;
         if (BestLocation.isIndoorValidate()) {
             p = new GeoLocation();
             p.address = "室内位置";
@@ -199,10 +195,8 @@ public class GisView extends RelativeLayout
             p.floorId = BestLocation.getInstance().floorId;
             p.time = new Date(BestLocation.getInstance().getUpdateTime());
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Common.getLogger(null).log(Level.INFO, String.format("getMyLocation: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                     p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
-
             return p;
         } else if (BestLocation.isGlobalValidate()) {
             p = new GeoLocation();
@@ -215,7 +209,6 @@ public class GisView extends RelativeLayout
             p.time = new Date(BestLocation.getInstance().getUpdateTime());
 
             if (p.lat != 0 && p.lng != 0) {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Common.getLogger(null).log(Level.INFO, String.format("getMyLocation: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                         p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
                 return p;
@@ -242,10 +235,8 @@ public class GisView extends RelativeLayout
                 p.direction = BestLocation.getInstance().direction;
                 p.time = new Date(net.getTime());
 
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Common.getLogger(null).log(Level.INFO, String.format("getMyLocation: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                         p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
-
                 return p;
             }
         } else {
@@ -257,19 +248,22 @@ public class GisView extends RelativeLayout
             p.direction = BestLocation.getInstance().direction;
             p.time = new Date(best.getTime());
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Common.getLogger(null).log(Level.INFO, String.format("getMyLocation: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                     p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
-
             return p;
         }
     }
 
+    /**
+     * 获取定位
+     * @param context
+     * @return
+     */
     public GeoLocation getMyLocation(Context context) {
         if (_instance != null)
             return _instance.getMyLocation();
 
-        GeoLocation p = null;
+        GeoLocation p;
         if (BestLocation.isIndoorValidate()) {
             p = new GeoLocation();
             p.address = BestLocation.getInstance().location;
@@ -280,10 +274,8 @@ public class GisView extends RelativeLayout
             p.floorId = BestLocation.getInstance().floorId;
             p.time = new Date(BestLocation.getInstance().getUpdateTime());
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Common.getLogger(null).log(Level.INFO, String.format("getMyLocation2: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                     p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
-
             return p;
         }
 //        else if (BestLocation.isGlobalValidate()) {
@@ -318,10 +310,8 @@ public class GisView extends RelativeLayout
                 p.direction = BestLocation.getInstance().direction;
                 p.time = new Date(net.getTime());
 
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Common.getLogger(null).log(Level.INFO, String.format("getMyLocation2: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                         p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
-
                 return p;
             }
         } else {
@@ -333,10 +323,8 @@ public class GisView extends RelativeLayout
             p.direction = BestLocation.getInstance().direction;
             p.time = new Date(best.getTime());
 
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Common.getLogger(null).log(Level.INFO, String.format("getMyLocation2: latitude: %f, longitude: %f, updateTime: %s, direction: %f, address: %s, buildingId: %s, floorId: %s",
                     p.lat, p.lng, formatter.format(p.time), p.direction, p.address, p.buildingId, p.floorId));
-
             return p;
         }
     }
@@ -344,8 +332,7 @@ public class GisView extends RelativeLayout
     private void init(Context context, AttributeSet attrs, int defStyle, int defStyleRes) {
         _instance = this;
         View inflate = inflate(context, R.layout.gisview, this);
-        Log.e("init", inflate.toString());
-        mapView = (MapView) inflate.findViewById(R.id.mapview);
+        mapView = inflate.findViewById(R.id.mapview);
         mapView.addMapViewEventListener(this);
         touchOverlay = new TouchOverlay();
         mapView.getOverlays().add(touchOverlay);
@@ -422,46 +409,72 @@ public class GisView extends RelativeLayout
         }
     }
 
-    public void getLocationOfAddress(final String address,final int count, final GeoServiceCallback callback){
-        new Thread(new Runnable(){
-            @Override
-            public void run() {
-               String ret = "[]";
-                try {
-                    String url = String.format("%s%s?address=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(), Common.GEO_CODE_URL(), address, count);
-                    ret =  GisView.getStringFromURL(url);
-                }
-                catch (Exception ex){
-                    Log.d(TAG, "getLocationOfAddress: "+ex.getMessage());
-                }
+    /**
+     * 查询地址相关地理信息
+     * @param address
+     * @param callback
+     */
+    public void getLocationOfAddress(final String address, final GeoServiceCallback callback) {
+        getLocationOfAddress(address, -1, callback);
+    }
 
-                JSONArray arr = new JSONArray();
+    /**
+     * 查询地址相关地理信息
+     * @param address
+     * @param count
+     * @param callback
+     */
+    public void getLocationOfAddress(final String address,final int count, final GeoServiceCallback callback){
+        new Thread(() -> {
+           String ret = "[]";
+            try {
+                String url = String.format("%s%s?address=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(), Common.GEO_CODE_URL(), address, count);
+                if (logEnable) {
+                    Log.e(TAG+"getLocationOfAddress", url);
+                }
+                ret = getStringFromURL(url);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+            JSONArray arr = new JSONArray();
+            try {
+                arr = new JSONArray(ret);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            GeoLocation[] res = new GeoLocation[arr.length()];
+            for (int i = 0; i < arr.length(); i++) {
+                res[i] = new GeoLocation();
                 try {
-                    arr = new JSONArray(ret);
-                } catch (JSONException e) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    res[i].address = obj.getString("address");
+                    if (!TextUtils.isEmpty(res[i].address) && res[i].address.contains(",")) {
+                        try {
+                            String[] array = res[i].address.split(",");
+                            res[i].parkId = array[0];
+                            res[i].parkX = array[1];
+                            res[i].parkY = array[2];
+                            res[i].roomCode = array[3];
+                            res[i].zoneX = array[4];
+                            res[i].zoneY = array[5];
+                            res[i].cnName = array[6];
+                            res[i].enName = array[7];
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    res[i].lng = obj.getJSONObject("location").getDouble("x");
+                    res[i].lat = obj.getJSONObject("location").getDouble("y");
+                    res[i].score = obj.getDouble("score");
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                GeoLocation [] res = new GeoLocation [arr.length()];
-
-
-                for (int i = 0;i < arr.length(); i ++){
-                    res[i] = new GeoLocation();
-                    try {
-                        JSONObject obj = arr.getJSONObject(i);
-                        res[i].address = obj.getString("address");
-                        res[i].lng = obj.getJSONObject("location").getDouble("x");
-                        res[i].lat = obj.getJSONObject("location").getDouble("y") ;
-                        res[i].score = obj.getDouble("score");
-                    }catch (Exception e){
-
-                    }
-
-                }
-
-                if(callback != null)
-                    callback.onQueryAddressFinished(res);
-
             }
+
+            if(callback != null)
+                callback.onQueryAddressFinished(res);
+
         }).start();
     }
 
@@ -475,64 +488,65 @@ public class GisView extends RelativeLayout
         getAddressOfLocation(lng, lat, -1, -1, callback);
     }
 
+    /**
+     * 通过经纬度获取地理信息
+     * @param lng
+     * @param lat
+     * @param radius
+     * @param count
+     * @param callback
+     */
     public void getAddressOfLocation(final double lng, final double lat,final double radius, final int count, final GeoServiceCallback callback){
-        new Thread(new Runnable(){
-            @Override
-            public void run() {
-                String ret = "[]";
-                try {
-                    String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(),Common.GEO_DECODE_URL(), lng, lat, radius, count);
+        new Thread(() -> {
+            String ret = "[]";
+            try {
+                String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(),Common.GEO_DECODE_URL(), lng, lat, radius, count);
+                if (logEnable) {
                     Log.e("getAddressOfLocation", url);
-                    ret =  GisView.getStringFromURL(url);
                 }
-                catch (Exception ex){
-                    Log.d(TAG, "getLocationOfAddress: "+ex.getMessage());
-                }
+                ret = getStringFromURL(url);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
-                JSONArray arr = new JSONArray();
+            JSONArray arr = new JSONArray();
+            try {
+                arr = new JSONArray(ret);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            GeoLocation[] res = new GeoLocation[arr.length()];
+            for (int i = 0; i < arr.length(); i++) {
+                res[i] = new GeoLocation();
                 try {
-                    arr = new JSONArray(ret);
-                } catch (JSONException e) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    res[i].address = obj.getString("address");
+                    if (!TextUtils.isEmpty(res[i].address) && res[i].address.contains(",")) {
+                        try {
+                            String[] array = res[i].address.split(",");
+                            res[i].parkId = array[0];
+                            res[i].parkX = array[1];
+                            res[i].parkY = array[2];
+                            res[i].roomCode = array[3];
+                            res[i].zoneX = array[4];
+                            res[i].zoneY = array[5];
+                            res[i].cnName = array[6];
+                            res[i].enName = array[7];
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    res[i].lng = obj.getJSONObject("location").getDouble("x");
+                    res[i].lat = obj.getJSONObject("location").getDouble("y");
+                    res[i].score = obj.getDouble("score");
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                GeoLocation [] res = new GeoLocation [arr.length()];
-
-
-                for (int i = 0;i < arr.length(); i ++){
-                    res[i] = new GeoLocation();
-                    try {
-                        JSONObject obj = arr.getJSONObject(i);
-                        res[i].address = obj.getString("address");
-
-                        if (!TextUtils.isEmpty(res[i].address) && res[i].address.contains(",")) {
-                            try {
-                                String[] array = res[i].address.split(",");
-                                res[i].parkId = array[0];
-                                res[i].parkX = array[1];
-                                res[i].parkY = array[2];
-                                res[i].roomCode = array[3];
-                                res[i].zoneX = array[4];
-                                res[i].zoneY = array[5];
-                                res[i].cnName = array[6];
-                                res[i].enName = array[7];
-                            } catch (ArrayIndexOutOfBoundsException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        res[i].lng = obj.getJSONObject("location").getDouble("x");
-                        res[i].lat = obj.getJSONObject("location").getDouble("y") ;
-                        res[i].score = obj.getDouble("score");
-                    }catch (Exception e){
-
-                    }
-
-                }
-
-                if(callback != null)
-                    callback.onQueryAddressFinished(res);
-
             }
+
+            if(callback != null)
+                callback.onQueryAddressFinished(res);
+
         }).start();
     }
 
@@ -546,79 +560,75 @@ public class GisView extends RelativeLayout
         queryWorkspace(lng, lat, -1, -1, callback);
     }
 
+    /**
+     * 通过经纬度获取地当前workspace
+     * @param lng
+     * @param lat
+     * @param radius
+     * @param count
+     * @param callback
+     */
     public static void queryWorkspace(final double lng, final double lat,final double radius, final int count, final QueryWorkspaceListener callback){
-        new Thread(new Runnable(){
-            @Override
-            public void run() {
-                String ret = "[]";
-                try {
-                    //获取HWYQ数据
-                    String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(),Common.GEO_DECODE_HWYQURL(), lng, lat, radius, count);
-                    Log.e("switchWorkspace", url);
-                    ret =  GisView.getStringFromURL(url);
-                }
-                catch (Exception ex){
-                    Log.d(TAG, "switchWorkspace: "+ex.getMessage());
-                }
+        new Thread(() -> {
+            String ret = "[]";
+            try {
+                //获取HWYQ数据
+                String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(),Common.GEO_DECODE_HWYQURL(), lng, lat, radius, count);
+                Log.e("switchWorkspace", url);
+                ret = getStringFromURL(url);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
 
-                JSONArray arr = new JSONArray();
+            JSONArray arr = new JSONArray();
+            try {
+                arr = new JSONArray(ret);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            GeoLocation[] res = new GeoLocation[arr.length()];
+            for (int i = 0; i < arr.length(); i++) {
+                res[i] = new GeoLocation();
                 try {
-                    arr = new JSONArray(ret);
-                } catch (JSONException e) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    res[i].address = obj.getString("address");
+                    if (!TextUtils.isEmpty(res[i].address) && res[i].address.contains(",")) {
+                        try {
+                            String[] array = res[i].address.split(",");
+                            res[i].parkId = array[0];
+                            res[i].parkX = array[1];
+                            res[i].parkY = array[2];
+                            res[i].roomCode = array[3];
+                            res[i].zoneX = array[4];
+                            res[i].zoneY = array[5];
+                            res[i].cnName = array[6];
+                            res[i].enName = array[7];
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    res[i].lng = obj.getJSONObject("location").getDouble("x");
+                    res[i].lat = obj.getJSONObject("location").getDouble("y");
+                    res[i].score = obj.getDouble("score");
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                GeoLocation[] res = new GeoLocation [arr.length()];
-                for (int i = 0;i < arr.length(); i ++){
-                    res[i] = new GeoLocation();
-                    try {
-                        JSONObject obj = arr.getJSONObject(i);
-                        res[i].address = obj.getString("address");
-
-                        if (!TextUtils.isEmpty(res[i].address) && res[i].address.contains(",")) {
-                            try {
-                                String[] array = res[i].address.split(",");
-                                res[i].parkId = array[0];
-                                res[i].parkX = array[1];
-                                res[i].parkY = array[2];
-                                res[i].roomCode = array[3];
-                                res[i].zoneX = array[4];
-                                res[i].zoneY = array[5];
-                                res[i].cnName = array[6];
-                                res[i].enName = array[7];
-                            } catch (ArrayIndexOutOfBoundsException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        res[i].lng = obj.getJSONObject("location").getDouble("x");
-                        res[i].lat = obj.getJSONObject("location").getDouble("y") ;
-                        res[i].score = obj.getDouble("score");
-                    }catch (Exception e){
-
-                    }
-                }
-
-                if(callback != null)
-                    callback.onQueryWorkspace(res);
-
             }
+
+            if(callback != null)
+                callback.onQueryWorkspace(res);
+
         }).start();
     }
 
 
-    public static String getStringFromURL(String urlString) throws IOException, JSONException {
+    public static String getStringFromURL(String urlString) throws IOException {
         HttpClient httpclient = new DefaultHttpClient();
-
-        HttpGet httpget= new HttpGet(urlString);
-
+        HttpGet httpget = new HttpGet(urlString);
         HttpResponse response = httpclient.execute(httpget);
-
-        if(response.getStatusLine().getStatusCode()==200){
-            String server_response = EntityUtils.toString(response.getEntity());
-            Log.i("Server response", server_response );
-            return server_response;
+        if (response.getStatusLine().getStatusCode() == 200) {
+            return EntityUtils.toString(response.getEntity());
         } else {
-            Log.i("Server response", "Failed to get server response" );
             return "[]";
         }
     }
@@ -666,7 +676,6 @@ public class GisView extends RelativeLayout
                     Rect self = new Rect(base.x - wid / 2, base.y - hei, base.x + wid / 2, base.y);
 
                     if (!(rect.left > self.right || rect.right < self.left || rect.top > self.bottom || rect.bottom < self.top)) {
-
                         MarkerEvent me = new MarkerEvent();
                         me.eventType = TargetEvent.Press;
                         me.position = new double[]{point2D.x, point2D.y};
@@ -1105,13 +1114,14 @@ public class GisView extends RelativeLayout
     }
 
     private void loadOffLineMaps(int zoom, double[] center) {
+        setZoom(center, zoom);
         if (mapLayer == null) {
-            MapController controller = mapView.getController();
-            controller.setCenter(new Point2D(center[1], center[0]));
-            controller.setZoom(zoom);
-
             mapLayer = new LayerView(getContext());
-            mapLayer.setURL(Common.getHost() + Common.MAP_URL());
+            String url = Common.getHost() + Common.MAP_URL();
+            if (logEnable) {
+                Log.e(TAG+"loadOffLineMaps", url);
+            }
+            mapLayer.setURL(url);
 //        mapLayer.setExtParams(Common.extParam());
 //        darkLayer = new MBTilesLayerView(getContext(), name);
 //        backMapLayer = new LayerView(getContext());
@@ -1164,6 +1174,12 @@ public class GisView extends RelativeLayout
         }
     }
 
+    /**
+     * 加载地图
+     * @param zoom 地图缩放级别
+     * @param center 经纬度中心点
+     * @return
+     */
     public boolean loadMap(int zoom, double[] center) {
         String[] location = QueryUtils.queryPark(center[0], center[1]);
         if (location != null) {
@@ -1176,13 +1192,28 @@ public class GisView extends RelativeLayout
             loadMap(zoom, center, location[0], location[0]);
             return true;
         }
-        return true;
+        return false;
     }
 
+    /**
+     * 加载地图
+     * @param zoom 地图缩放级别
+     * @param center 经纬度中心点
+     * @param workspace 工作空间
+     * @param parkId 园区id
+     */
     public void loadMap(int zoom, double[] center, String workspace, String parkId) {
-        loadMap(zoom, center, workspace, parkId, new ArrayList<String>());
+        loadMap(zoom, center, workspace, parkId, new ArrayList<>());
     }
 
+    /**
+     * 加载地图
+     * @param zoom 地图缩放级别
+     * @param center 经纬度中心点
+     * @param workspace 工作空间
+     * @param parkId 园区id
+     * @param extParam 额外参数
+     */
     public void loadMap(int zoom, double[] center, String workspace, String parkId, List<String> extParam) {
         Common.setCurrentZone(workspace, parkId);
         Common.setExtParam(extParam);
@@ -1205,50 +1236,90 @@ public class GisView extends RelativeLayout
         return Common.parkId();
     }
 
+    /**
+     * 设置地图中心点
+     * @param lat
+     * @param lng
+     */
     public void setCenter(double lat, double lng) {
         MapController controller = mapView.getController();
         controller.setCenter(new Point2D(lng, lat));
+        if (logEnable) {
+            Log.e(TAG+"setCenter", "lat="+lat+",lng="+lng);
+        }
         fitHeatmapToView(false);
-
-
     }
-    public double [] getMapBounds(){
-        double [] vars = new double [4];
-        if(mapView != null) {
+
+    /**
+     * 获取地图边界
+     * @return
+     */
+    public double[] getMapBounds() {
+        double[] vars = new double[4];
+        if (mapView != null) {
             BoundingBox bx = mapView.getViewBounds();
             vars[0] = bx.getTop();
-            vars [1] = bx.getLeft();
+            vars[1] = bx.getLeft();
             vars[2] = bx.getBottom();
             vars[3] = bx.getRight();
             return vars;
-        }
-        else
+        } else
             return null;
     }
 
+    /**
+     * 获取地图中心点
+     * @return
+     */
     public double[] getCenter() {
         Point2D point2D = mapView.getCenter();
         double[] result = new double[2];
         result[0] = point2D.y;
         result[1] = point2D.x;
-
         return result;
     }
 
+    /**
+     * 设置地图缩放值
+     * @param zoom 地图缩放值
+     */
+    public void setZoom(int zoom) {
+        MapController controller = mapView.getController();
+        controller.setZoom(zoom);
+    }
+
+    /**
+     * 设置地图缩放值
+     * @param center 地图中心点
+     * @param zoom 地图缩放值
+     */
     public void setZoom(double[] center, int zoom) {
         MapController controller = mapView.getController();
         controller.setCenter(new Point2D(center[1], center[0]));
         controller.setZoom(zoom);
     }
 
+    /**
+     * 设置地图最大缩放值
+     * @param level
+     */
     public void setMaxZoomLevel(int level) {
         maxZoomLevel = level;
     }
 
+    /**
+     * 地图放大
+     */
     public void zoomInMap() {
         mapView.zoomIn();
+        if (logEnable) {
+            Log.e(TAG+"zoomInMap", mapView.getZoomLevel()+"");
+        }
     }
 
+    /**
+     * 地图缩小
+     */
     public void zoomOutMap() {
         mapView.zoomOut();
     }
@@ -1257,6 +1328,12 @@ public class GisView extends RelativeLayout
         return mapView.getZoomLevel();
     }
 
+    /**
+     * 设置室内地图参数
+     * @param zoomLevel 缩放级别
+     * @param listener 缩放监听事件
+     * @param defaultZoomIndoor 楼层id
+     */
     public void setSwitchIndoor(int zoomLevel, ZoomToIndoorListener listener, String defaultZoomIndoor) {
         this.indoorZoomLevel = zoomLevel;
         this.mZoomToIndoorListener = listener;
@@ -1264,6 +1341,9 @@ public class GisView extends RelativeLayout
             this.defaultZoomIndoor = defaultZoomIndoor;
     }
 
+    /**
+     * 销毁地图
+     */
     public void destroyMap() {
         GisDataCache.clearCaches();
         handler.removeMessages(Common.START_TIMER);
@@ -1297,10 +1377,23 @@ public class GisView extends RelativeLayout
         isMapLoaded = false;
     }
 
+    /**
+     * 改变marker位置
+     * @param markerId
+     * @param lat
+     * @param lng
+     */
     public void changeMarkerPosition(String markerId, double lat, double lng) {
         changeMarkerPosition(markerId, lat, lng, null);
     }
 
+    /**
+     * 改变marker位置
+     * @param markerId
+     * @param lat
+     * @param lng
+     * @param marker
+     */
     public void changeMarkerPosition(String markerId, double lat, double lng, Drawable marker) {
         List<Overlay> ovls = mapView.getOverlays();
         for (Overlay ov : ovls) {
@@ -1447,10 +1540,20 @@ public class GisView extends RelativeLayout
         }
     }
 
+    /**
+     * 绘制帧动画marker
+     * @param layerId
+     * @param layerIndex
+     * @param markers
+     */
     public void addFlashMarker(String layerId, int layerIndex, FlashMarker[] markers) {
         addMarker(layerId, layerIndex, markers);
     }
 
+    /**
+     * 删除marker
+     * @param markerId
+     */
     public void deleteMarker(String markerId) {
         List<Overlay> ovls = mapView.getOverlays();
         for (Overlay ov : ovls) {
@@ -1468,6 +1571,10 @@ public class GisView extends RelativeLayout
         }
     }
 
+    /**
+     * 删除图层
+     * @param layerId 图层id
+     */
     public void deleteLayer(String layerId) {
         List<Overlay> ovlys = namedOverlays.get(layerId);
         if (ovlys != null && ovlys.size() > 0) {
@@ -1487,6 +1594,16 @@ public class GisView extends RelativeLayout
         mMarkerListener.remove(listener);
     }
 
+    /**
+     * 绘制气泡
+     * @param position
+     * @param content
+     * @param offset
+     * @param width
+     * @param height
+     * @param tag
+     * @return
+     */
     public Object addPopup(double[] position, String content, double[] offset, int width, int height, Object tag) {
         SimplePopupOverlay overlay = new SimplePopupOverlay();
         overlay.setCoord(position);
@@ -1513,13 +1630,15 @@ public class GisView extends RelativeLayout
         return overlay;
     }
 
+    /**
+     * 关闭气泡
+     */
     public void closePopup() {
         List<Overlay> ovlys = mapView.getOverlays();
         List<Overlay> ovdels = new ArrayList<>();
         if (ovlys != null && ovlys.size() > 0) {
             for (Overlay ov : ovlys) {
                 if (ov instanceof SimplePopupOverlay || ov instanceof PopupOverlay){
-                    Log.d(TAG, "closePopup: " + ov.getKey());
                     ovdels.add(ov);
                 }
             }
@@ -1535,7 +1654,6 @@ public class GisView extends RelativeLayout
         if (ovlys != null && ovlys.size() > 0) {
             for (Overlay ov : ovlys) {
                 if (ov.getKey() == olay.getKey()){
-                    Log.d(TAG, "closePopup: " + ov.getKey());
                     mapView.getOverlays().remove(ov);
                     mapView.invalidate();
                     break;
@@ -1549,6 +1667,11 @@ public class GisView extends RelativeLayout
         swichIndoorMap(buildingId, floorid);
     }
 
+    /**
+     * 显示室内地图
+     * @param buildingId
+     * @param floorid
+     */
     public void showIndoorMap(String buildingId, String floorid) {
         swichIndoorMap(buildingId, floorid);
     }
@@ -1779,10 +1902,17 @@ public class GisView extends RelativeLayout
         setRoomStyle(buildingId, floorId, roomId, "ROOMID", roomStyle);
     }
 
+    /**
+     * 切换到室外地图
+     */
     public void switchOutdoor() {
         showIndoorMap("", "");
     }
 
+    /**
+     * 绘制线
+     * @param points
+     */
     public void drawCustomPath(RoutePoint[] points) {
         List<Point2D> point2DS = new ArrayList<>();
         for (RoutePoint p : points) {
@@ -1813,6 +1943,13 @@ public class GisView extends RelativeLayout
         NetWorkAnalystUtil.excutePathService(mapView, start, end, way, ps, handler);
     }
 
+    /**
+     * 路径规划
+     * @param start
+     * @param end
+     * @param way
+     * @param ps
+     */
     public void calcRoutePath(RoutePoint start, RoutePoint end, RoutePoint[] way, PresentationStyle ps) {
         NetWorkAnalystUtil.excutePathService(mapView, start, end, way, ps, handler);
     }
@@ -1834,6 +1971,9 @@ public class GisView extends RelativeLayout
             defaultFacilities.put(keys[i], markers[i]);
     }
 
+    /**
+     * 清除路径轨迹
+     */
     public void clearPath() {
         calculatedRoute = null;
         if (routeOverlay != null && routeOverlay.size() > 0) {
@@ -1908,6 +2048,12 @@ public class GisView extends RelativeLayout
         return false;
     }
 
+    /**
+     * 绘制热力图
+     * @param points 热力点个数
+     * @param radius 半径
+     * @param opacity 透明度
+     */
     public void showHeatMap(HeatPoint[] points, int radius, double opacity) {
         HeatmapDrawable heatmapDrawable = new HeatmapDrawable(points, radius, handler);
         heatmapList.add(heatmapDrawable);
@@ -1919,12 +2065,13 @@ public class GisView extends RelativeLayout
         DrawableOverlay overlay = new DrawableOverlay(heatmapDrawable,
                 new BoundingBox(new Point2D(heatmapDrawable.geoLeft, heatmapDrawable.geoTop),
                         new Point2D(heatmapDrawable.geoRight, heatmapDrawable.geoBottom)));
-
         mapView.getOverlays().add(overlay);
-
         heatmapDrawable.fitToMapView(leftTop.x, leftTop.y, rightBottom.x, rightBottom.y, true);
     }
 
+    /**
+     * 清除热力图
+     */
     public void clearHeatMap() {
         List<Overlay> ovlys = mapView.getOverlays();
         List<Overlay> ovdels = new ArrayList<>();
@@ -1940,20 +2087,20 @@ public class GisView extends RelativeLayout
         heatmapList.clear();
     }
 
-    public void displayPerimeter(String parkId,
-                                 String normalColor, int normalWidth, int normalOpacity,
-                                 String alarmColor, int alarmWidth, int alarmOpacity,
-                                 int[] alarmList) {
+    public void displayPerimeter(String parkId, String normalColor, int normalWidth, int normalOpacity,
+                                 String alarmColor, int alarmWidth, int alarmOpacity, int[] alarmList) {
         PerimeterStyle alarm = new PerimeterStyle(Color.parseColor(alarmColor), alarmWidth, alarmOpacity);
         PerimeterStyle normal = new PerimeterStyle(Color.parseColor(normalColor), normalWidth, normalOpacity);
         displayPerimeter(parkId, alarm, normal, alarmList);
     }
 
     public void displayPerimeter(String parkId, PerimeterStyle alarm, PerimeterStyle normal, int[] alarmList) {
-
         QueryUtils.queryPerimeter(parkId, alarm, normal, alarmList, handler);
     }
 
+    /**
+     * 清除边界线
+     */
     public void removePerimeter() {
         if (namedOverlays.containsKey(perimeterKey)) {
             List<Overlay> ovls = namedOverlays.get(perimeterKey);
@@ -1980,11 +2127,20 @@ public class GisView extends RelativeLayout
         showModelHighlight(ids, pss, ps);
     }
 
+    /**
+     * 模型高亮
+     * @param modIds
+     * @param pss
+     * @param other
+     */
     public void showModelHighlight(List<int[]> modIds, List<PresentationStyle> pss, PresentationStyle other) {
         isShowHighLight = true;
         QueryUtils.queryModel(modIds, pss, other, handler);
     }
 
+    /**
+     * 清除模型高亮
+     */
     public void removeModelhighlighting() {
         isShowHighLight = false;
         if (namedOverlays.containsKey(modelsKey)) {
@@ -1997,77 +2153,103 @@ public class GisView extends RelativeLayout
         }
     }
 
+    /**
+     * 查询信息
+     * @param parkId
+     * @param address
+     * @param callback
+     */
     public void queryObject(final String parkId, final String address, final QueryCallback callback) {
-        Common.fixedThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                String addr = null;
-                double lng = 0, lat = 0;
+        Common.fixedThreadPool.execute(() -> {
+            String addr = null;
+            double lng = 0, lat = 0;
+            try {
+                String ret = "[]";
                 try {
-                    String ret = "[]";
-                    try {
-                        String enc_addr = URLEncoder.encode(address, "UTF-8");
-                        String url = Common.getHost() + Common.GEO_CODE_URL() + "?address="+enc_addr+"&fromIndex=0&toIndex=10&maxReturn=1";
-                        if (!TextUtils.isEmpty(Common.ROMA_KEY))
-                            url += "&" + Common.ROMA_KEY;
-                        ret =  GisView.getStringFromURL(url);
+                    String enc_addr = URLEncoder.encode(address, "UTF-8");
+                    String url = String.format("%s%s?address=%s&fromIndex=0&toIndex=10&maxReturn=1", Common.getHost(), Common.GEO_CODE_URL(), enc_addr);
+                    if (!TextUtils.isEmpty(Common.ROMA_KEY)) {
+                        url += "&" + Common.ROMA_KEY;
                     }
-                    catch (Exception ex){
-                        Log.d(TAG, "getLocationOfAddress: "+ex.getMessage());
+                    if (logEnable) {
+                        Log.e(TAG+"queryObject", url);
                     }
+                    ret = getStringFromURL(url);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
 
-                    JSONArray arr = new JSONArray();
+                JSONArray arr = new JSONArray();
+                try {
+                    arr = new JSONArray(ret);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (arr.length() > 0){
                     try {
-                        arr = new JSONArray(ret);
-                    } catch (JSONException e) {
+                        JSONObject obj = arr.getJSONObject(0);
+                        addr = obj.getString("address");
+                        lng = obj.getJSONObject("location").getDouble("x");
+                        lat = obj.getJSONObject("location").getDouble("y") ;
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    if (arr.length() > 0){
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (!TextUtils.isEmpty(addr)) {
+                ObjectInfo info = QueryUtils.getObjectInfo(parkId, lat, lng);
+                if (info != null) {
+                    info.address = addr;
+                    if (!TextUtils.isEmpty(info.address) && info.address.contains(",")) {
                         try {
-                            JSONObject obj = arr.getJSONObject(0);
-                            addr = obj.getString("address");
-                            lng = obj.getJSONObject("location").getDouble("x");
-                            lat = obj.getJSONObject("location").getDouble("y") ;
-                        } catch (Exception e) {
+                            String[] array = info.address.split(",");
+                            info.parkId = array[0];
+                            info.parkX = array[1];
+                            info.parkY = array[2];
+                            info.roomCode = array[3];
+                            info.zoneX = array[4];
+                            info.zoneY = array[5];
+                            info.cnName = array[6];
+                            info.enName = array[7];
+                        } catch (ArrayIndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (!TextUtils.isEmpty(addr)) {
-                    ObjectInfo info = QueryUtils.getObjectInfo(parkId, lat, lng);
-                    if (info != null) {
-                        info.address = addr;
-                        info.lng = lng;
-                        info.lat = lat;
-                        if (callback != null)
-                            callback.onQueryFinished(info);
-                    }
+                    info.lng = lng;
+                    info.lat = lat;
+                    if (callback != null)
+                        callback.onQueryFinished(info);
                 }
             }
         });
     }
 
+    /**
+     * 获取building信息
+     * @param parkId
+     * @param buildingId
+     * @param callback
+     */
     public void getBuldingInfo(final String parkId, final String buildingId, final QueryCallback callback) {
-        final String myLanguate = this._lang;
-        Common.fixedThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
+        Common.fixedThreadPool.execute(() -> {
             ObjectInfo info = QueryUtils.getBuildingInfo(parkId, buildingId);
-
             if (info != null) {
                 try {
                     String ret = "[]";
                     try {
                         String enc_addr = URLEncoder.encode(info.getStrParam("NAME"), "UTF-8");
-                        String url = Common.getHost() + Common.GEO_CODE_URL() + "?address="+enc_addr+"&fromIndex=0&toIndex=10&maxReturn=1";
-                        if (!TextUtils.isEmpty(Common.ROMA_KEY))
+                        String url = String.format("%s%s?address=%s&fromIndex=0&toIndex=10&maxReturn=1", Common.getHost(), Common.GEO_CODE_URL(), enc_addr);
+                        if (!TextUtils.isEmpty(Common.ROMA_KEY)) {
                             url += "&" + Common.ROMA_KEY;
-                        ret =  GisView.getStringFromURL(url);
-                    }
-                    catch (Exception ex){
-                        Log.d(TAG, "getLocationOfAddress: "+ex.getMessage());
+                        }
+                        if (logEnable) {
+                            Log.e(TAG+"getBuldingInfo", url);
+                        }
+                        ret = getStringFromURL(url);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
                     JSONArray arr = new JSONArray();
@@ -2076,12 +2258,27 @@ public class GisView extends RelativeLayout
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    if (arr.length() > 0){
+                    if (arr.length() > 0) {
                         try {
                             JSONObject obj = arr.getJSONObject(0);
                             info.address = obj.getString("address");
+                            if (!TextUtils.isEmpty(info.address) && info.address.contains(",")) {
+                                try {
+                                    String[] array = info.address.split(",");
+                                    info.parkId = array[0];
+                                    info.parkX = array[1];
+                                    info.parkY = array[2];
+                                    info.roomCode = array[3];
+                                    info.zoneX = array[4];
+                                    info.zoneY = array[5];
+                                    info.cnName = array[6];
+                                    info.enName = array[7];
+                                } catch (ArrayIndexOutOfBoundsException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                             info.lng = obj.getJSONObject("location").getDouble("x");
-                            info.lat = obj.getJSONObject("location").getDouble("y") ;
+                            info.lat = obj.getJSONObject("location").getDouble("y");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -2093,10 +2290,15 @@ public class GisView extends RelativeLayout
                 if (callback != null)
                     callback.onQueryFinished(info);
             }
-            }
         });
     }
 
+    /**
+     * 查询数据
+     * @param dataset 查询条件
+     * @param filter 过滤条件
+     * @return
+     */
     public List<ObjectInfo> query(String dataset, String filter) {
         return QueryUtils.getObjects(dataset, filter);
     }
@@ -2157,17 +2359,18 @@ public class GisView extends RelativeLayout
             this._lang = "cn";
         }
     }
+
+    /**
+     * 设置地图隐藏级别，隐藏对应级别图层
+     * @param level
+     */
     public void setHideLevel(int level) {
         mHideLevel = level;
         switchMarkerHide();
     }
 
     private void switchMarkerHide() {
-        boolean show;
-        if (mapView.getZoomLevel() > mHideLevel)
-            show = true;
-        else
-            show = false;
+        boolean show = mapView.getZoomLevel() > mHideLevel;
         List<Overlay> overlays = mapView.getOverlays();
         for (Overlay ov : overlays) {
             if (ov instanceof DefaultItemizedOverlay) {
@@ -2191,6 +2394,9 @@ public class GisView extends RelativeLayout
         mPosListener.remove(listener);
     }
 
+    /**
+     * 开始定位
+     */
     public void startLocate() {
         if (_instance != null) {
             if (_instance.mLocationClient != null) {
@@ -2201,6 +2407,9 @@ public class GisView extends RelativeLayout
         isLocatorRunning = true;
     }
 
+    /**
+     * 停止定位
+     */
     public void stopLocate() {
         isLocatorRunning = false;
         if (_instance != null) {
@@ -2706,19 +2915,21 @@ public class GisView extends RelativeLayout
         for (String range : calculatedRoute.range) {
             if (range.equalsIgnoreCase(currIndoorMap)) {
                 com.supermap.services.components.commontypes.Path[] paths = calculatedRoute.route.get(index);
-                for (com.supermap.services.components.commontypes.Path path : paths) {
-                    if (paths == null)
-                        continue;
-                    if (path.route != null && path.route.points != null && path.route.points.length > 0) {
-                        List<Point2D> point2DS = new ArrayList<>();
-                        for (com.supermap.services.components.commontypes.Point2D point : path.route.points)
-                            point2DS.add(new Point2D(point.x, point.y));
-                        LineOverlay overlay = new LineOverlay(paint);
-                        overlay.setLinePaint(paint);
-                        overlay.setPointPaint(paint);
-                        overlay.setShowPoints(false);
-                        overlay.setData(point2DS);
-                        ovls.add(overlay);
+                if (paths != null) {
+                    for (com.supermap.services.components.commontypes.Path path : paths) {
+                        if (path == null)
+                            continue;
+                        if (path.route != null && path.route.points != null && path.route.points.length > 0) {
+                            List<Point2D> point2DS = new ArrayList<>();
+                            for (com.supermap.services.components.commontypes.Point2D point : path.route.points)
+                                point2DS.add(new Point2D(point.x, point.y));
+                            LineOverlay overlay = new LineOverlay(paint);
+                            overlay.setLinePaint(paint);
+                            overlay.setPointPaint(paint);
+                            overlay.setShowPoints(false);
+                            overlay.setData(point2DS);
+                            ovls.add(overlay);
+                        }
                     }
                 }
             }
@@ -2839,6 +3050,10 @@ public class GisView extends RelativeLayout
         mapView.invalidate();
     }
 
+    /**
+     * 渲染边界
+     * @param perimeter
+     */
     private void renderPerimeter(QueryUtils.PerimeterResult perimeter) {
         List<Overlay> ovls;
         if (namedOverlays.containsKey(perimeterKey)) {

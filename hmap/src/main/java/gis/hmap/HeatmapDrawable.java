@@ -143,9 +143,11 @@ class HeatmapDrawable extends Drawable {
                         for (int j = 0; j < heatmap[i].length; j++) {
                             if (heatmap[i][j] == 0) continue;
                             int val = (int)(heatmap[i][j] / maxHeat * 255);
-                            paint.setColor(colortab[val]);
-                            paint.setAlpha((int)(Math.sqrt(val)*15));
-                            canvas.drawPoint(i, j, paint);
+                            if (val < colortab.length) {
+                                paint.setColor(colortab[val]);
+                                paint.setAlpha((int)(Math.sqrt(val)*15));
+                                canvas.drawPoint(i, j, paint);
+                            }
                         }
                     }
                     Message msg = new Message();

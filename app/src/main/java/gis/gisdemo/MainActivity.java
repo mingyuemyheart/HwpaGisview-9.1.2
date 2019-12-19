@@ -249,18 +249,6 @@ public class MainActivity extends Activity
         if (id == R.id.loadMap) {
             gisView.loadMap(2, new double[] {22.6573017046106460,114.0576151013374200});
         }
-        if (id == R.id.loadMap2) {
-            gisView.loadMap(5, new double[] {22.6573017046106460,114.0576151013374200});
-
-            //查询所有园区
-
-//            List<ObjectInfo> result = gisView.query("boundary", "");
-//            if(result != null){
-//                String msg = String.format("查询到%d条结果：\n", result.size());
-//                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-//            }
-
-        }
         else if(id == R.id.encodeAddress){  //查询经纬度对应地名
 //            gisView.getAddressOfLocation(117.16909751245657,36.65221619825378,0.0005,5,this);
             gisView.getAddressOfLocation(114.0576151013374200,22.6573017046106460, this);
@@ -364,30 +352,30 @@ public class MainActivity extends Activity
 //            GeneralMarker[] markers = new GeneralMarker[] {
 //                    new GeneralMarker(
 //                            new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-//                            String.format("marker%d", cnt++),
+//                            String.format("layout_marker%d", cnt++),
 //                            getResources().getDrawable(R.drawable.marker_1, null),
 //                            64, 64, null),
 //                    new GeneralMarker(
 //                            new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-//                            String.format("marker%d", cnt++),
+//                            String.format("layout_marker%d", cnt++),
 //                            getResources().getDrawable(R.drawable.marker_2, null),
 //                            64, 64, null)
 //            };
 
 
-            Drawable drawable =  LayoutToDrawable(R.layout.marker,168);
+            Drawable drawable =  LayoutToDrawable(R.layout.layout_marker,168);
 
 
 
             GeneralMarker[] markers = new GeneralMarker[] {
                     new GeneralMarker(
                             new double[] { 22.655299147231652, 114.05824998467759 },
-                            String.format("marker%d", cnt++),
+                            String.format("layout_marker%d", cnt++),
                             drawable,
                             128, 128, null),
                     new GeneralMarker(
                             new double[] { 22.65024607457551, 114.05212154169743 },
-                            String.format("marker%d", cnt++),
+                            String.format("layout_marker%d", cnt++),
                             getResources().getDrawable(R.drawable.marker_2, null),
                             128, 128, null)
             };
@@ -401,10 +389,10 @@ public class MainActivity extends Activity
             GeneralMarker[] markers = new GeneralMarker[] {
                     new GeneralMarker(
                             new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-                            String.format("marker%d", cnt++), "./images/pic1.png", 64, 64, null),
+                            String.format("layout_marker%d", cnt++), "./images/pic1.png", 64, 64, null),
                     new GeneralMarker(
                             new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-                            String.format("marker%d", cnt++), "./images/pic2.png", 64, 64, null)
+                            String.format("layout_marker%d", cnt++), "./images/pic2.png", 64, 64, null)
             };
             gisView.addMarker("lm01", 999, markers);
 
@@ -419,10 +407,10 @@ public class MainActivity extends Activity
             FlashMarker[] markers = new FlashMarker[] {
                     new FlashMarker(
                             new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-                            String.format("marker%d", cnt++), ani, 500, 10000, 64, 64, null),
+                            String.format("layout_marker%d", cnt++), ani, 500, 10000, 64, 64, null),
                     new FlashMarker(
                             new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-                            String.format("marker%d", cnt++), ani, 500, 10000, 64, 64, null),
+                            String.format("layout_marker%d", cnt++), ani, 500, 10000, 64, 64, null),
             };
             //gisView.addMarker("lm02", 999, markers);
             gisView.addFlashMarker("lm02", 999, markers);
@@ -431,10 +419,10 @@ public class MainActivity extends Activity
             FlashMarker[] markers = new FlashMarker[] {
                     new FlashMarker(
                             new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-                            String.format("marker%d", cnt++), ani, 500, 10000, 64, 64, null),
+                            String.format("layout_marker%d", cnt++), ani, 500, 10000, 64, 64, null),
                     new FlashMarker(
                             new double[] { 36.65221619825378 + (Math.random()-0.5) / 1000, 117.16909751245657 + (Math.random()-0.5) / 1000 },
-                            String.format("marker%d", cnt++), ani, 500, 10000, 64, 64, null),
+                            String.format("layout_marker%d", cnt++), ani, 500, 10000, 64, 64, null),
             };
             gisView.addFlashMarker("lm02", 999, markers);
         } else if (id == R.id.zoom1) {
@@ -459,7 +447,7 @@ public class MainActivity extends Activity
                     new double[] {-150,-164},
                     300,
                     100,
-                    "hello marker"
+                    "hello layout_marker"
 
             );
             popups.add(o);
@@ -531,23 +519,6 @@ public class MainActivity extends Activity
 //                                    Color.parseColor("#F20216"),
 //                                    "", "", 20, 100),
 //                    });
-//            PresentationStyle ps = new PresentationStyle();
-//            ps.opacity = 120;
-//            ps.fillColor = Color.parseColor("#02D6F2");
-//            ps.lineWidth = 20;
-//            gisView.calcRoutePath(
-//                    new RoutePoint(new double[] { 22.657048157416284, 114.05679415678605 },
-//                            Color.parseColor("#F20216"),
-//                            "J04", "F01", 20, 100, getResources().getDrawable(R.drawable.marker_1), 64, 64),
-//                    new RoutePoint(new double[] { 22.655835798941553, 114.05793141340837 },
-//                            Color.parseColor("#F20216"),
-//                            "J01", "F02", 20, 100, getResources().getDrawable(R.drawable.marker_3), 64,64),
-//                    new RoutePoint[] {
-////                            new RoutePoint(new double[] { 36.65418334779979, 117.1704206617127 },
-////                                    Color.parseColor("#F20216"),
-////                                    "", "", 20, 100, getResources().getDrawable(R.drawable.marker_2), 64, 64)
-//                    },
-//                    ps);
             gisView.addRouteListener(this);
             PresentationStyle ps = new PresentationStyle();
             ps.opacity = 120;
@@ -894,7 +865,7 @@ public class MainActivity extends Activity
                 new double[] {0,0},
                 300,
                 100,
-                "hello marker"
+                "hello layout_marker"
 
         );
         popups.add(o);
@@ -973,7 +944,7 @@ public class MainActivity extends Activity
                                 new double[] {0,0},
                                 300,
                                 100,
-                                "hello marker"
+                                "hello layout_marker"
 
                         );
                     }

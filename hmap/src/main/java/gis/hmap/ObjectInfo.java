@@ -12,6 +12,15 @@ public class ObjectInfo {
     public String[] fields;
     public String[] values;
 
+    public String parkId = "";
+    public String roomCode = "";
+    public String parkX = "";
+    public String parkY = "";
+    public String zoneX = "";
+    public String zoneY = "";
+    public String cnName = "";
+    public String enName = "";
+
     public ObjectInfo(String[] fields, String[] values) {
         this.fields = fields;
         this.values = values;

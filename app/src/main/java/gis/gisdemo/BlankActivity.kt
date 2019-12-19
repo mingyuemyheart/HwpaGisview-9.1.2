@@ -27,7 +27,7 @@ class BlankActivity : Activity() {
     private fun initMap() {
         btnIntent.visibility = View.GONE
         btnIntent.setOnClickListener {
-            startActivity(Intent(this@BlankActivity, MainActivity::class.java))
+            startActivity(Intent(this@BlankActivity, MainActivity2::class.java))
         }
 
         GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
@@ -43,8 +43,10 @@ class BlankActivity : Activity() {
             }
 
             override fun onIVASMappingFailed(msg: String?) {
-                Log.e("onIVASMappingFailed", msg)
-                Toast.makeText(this@BlankActivity, msg, Toast.LENGTH_SHORT).show()
+                mUIHandler.post {
+                    Log.e("onIVASMappingFailed", msg)
+                    Toast.makeText(this@BlankActivity, msg, Toast.LENGTH_SHORT).show()
+                }
             }
         })
 
