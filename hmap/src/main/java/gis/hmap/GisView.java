@@ -1563,6 +1563,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                     OverlayItemEx item = (OverlayItemEx) overlay.getItem(i);
                     if (item.getTitle().equalsIgnoreCase(markerId)) {
                         overlay.removeItem(item);
+                        mapView.getOverlays().remove(overlay);
                         mapView.invalidate();
                         return;
                     }

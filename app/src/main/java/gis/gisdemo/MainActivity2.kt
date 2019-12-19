@@ -33,7 +33,6 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             "android.permission.READ_PHONE_STATE")
     private var cnt = 0
     private val popups = ArrayList<Any>()
-    private var markerId: String? = null
     private val mUIHandler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -179,8 +178,8 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 gisView.changeMarkerPosition("layout_marker1", lat, lng) //设置marker位置
             }
             R.id.deleteMarker -> {
-                if (markerId != null) {
-                    gisView.deleteMarker(markerId)
+                for (i in 0 .. cnt) {
+                    gisView.deleteMarker(String.format("layout_marker%d", i))
                 }
             }
             R.id.deleteLayer -> {
@@ -540,7 +539,6 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
 
     override fun markerEvent(me: MarkerEvent?) {
         val msg = String.format("%s, %s", me!!.eventType.toString(), me.markerId)
-        markerId = me.markerId
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 
