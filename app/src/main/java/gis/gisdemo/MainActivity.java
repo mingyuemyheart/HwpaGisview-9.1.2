@@ -144,12 +144,12 @@ public class MainActivity extends Activity
     }
 
     private void checkPermission(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            if (!PermissionDetect.hasPermissions(this, mPerms))
-                ActivityCompat.requestPermissions(this, mPerms,1);
-            else
-                initLoc();
-        else
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+//            if (!PermissionDetect.hasPermissions(this, mPerms))
+//                ActivityCompat.requestPermissions(this, mPerms,1);
+//            else
+//                initLoc();
+//        else
             initLoc();
     }
 
