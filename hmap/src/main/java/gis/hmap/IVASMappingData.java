@@ -9,7 +9,7 @@ public class IVASMappingData {
     public String buildingId;
     public String[] floorList;
     public String ivasBuildingId;
-    public int[] ivasFloorList;
+    public String[] ivasFloorList;
     public String[] fields;
     public String[] values;
 
@@ -32,11 +32,12 @@ public class IVASMappingData {
             else if (feature.fieldNames[i].equalsIgnoreCase("IVASTESTBUILDINGID") && useTest)
                 ivasBuildingId = feature.fieldValues[i];
             else if (feature.fieldNames[i].equalsIgnoreCase("IVASFLOORLIST")) {
-                String[] lst = feature.fieldValues[i].split(",");
-                if (lst != null) {
-                    ivasFloorList = new int[lst.length];
-                    for (int j = 0; j < lst.length; j++)
-                        ivasFloorList[j] = Integer.parseInt(lst[j]);
+                if (feature.fieldValues[i].contains(",")) {
+                    String[] lst = feature.fieldValues[i].split(",");
+                    ivasFloorList = new String[lst.length];
+                    for (int j = 0; j < lst.length; j++) {
+                        ivasFloorList[j] = lst[j];
+                    }
                 }
             }
         }

@@ -2426,16 +2426,22 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     public static void setLocDecoder(boolean test, IVASMappingListener callback) {
         GisDataCache.initIVASMapping(test, callback);
     }
+
+    /**
+     * 查询对应楼层ivas数据集
+     * @param id
+     * @param floor
+     * @return
+     */
     public ExternLocData decodeLocLocation(String id, int floor) {
         IVASMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getIVASBuilding(id);
         if (data != null && data.ivasFloorList != null && data.floorList != null) {
             for (int i=0; i<data.ivasFloorList.length && i<data.floorList.length; i++) {
-                if (data.ivasFloorList[i] == floor) {
+                if (TextUtils.equals(data.ivasFloorList[i], floor+"")) {
                     return new ExternLocData(data.lat, data.lng, data.buildingId, data.floorList[i], data.roomCode, data.fields, data.values);
                 }
             }
         }
-
         return null;
     }
 

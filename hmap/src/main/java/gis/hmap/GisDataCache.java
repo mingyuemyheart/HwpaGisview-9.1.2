@@ -73,22 +73,19 @@ final class GisDataCache {
 
     public static void initIVASMapping(final boolean test, final IVASMappingListener callback) {
         final boolean useTest = test;
-        Common.fixedThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                Feature[] features = QueryUtils.queryDatasetAll("IVAS", true);
-                if (features != null) {
-                    for (Feature feature : features) {
-                        IVASMappingData data = new IVASMappingData(feature, useTest);
-                        iVasMapping.add(data);
-                    }
+        Common.fixedThreadPool.execute(() -> {
+            Feature[] features = QueryUtils.queryDatasetAll("IVAS", true);
+            if (features != null) {
+                for (Feature feature : features) {
+                    IVASMappingData data = new IVASMappingData(feature, useTest);
+                    iVasMapping.add(data);
                 }
-                if (callback != null) {
-                    if (iVasMapping.size() > 0) {
-                        callback.onIVASMappingSuccess(iVasMapping);
-                    } else {
-                        callback.onIVASMappingFailed("暂无查询数据");
-                    }
+            }
+            if (callback != null) {
+                if (iVasMapping.size() > 0) {
+                    callback.onIVASMappingSuccess(iVasMapping);
+                } else {
+                    callback.onIVASMappingFailed("暂无查询数据");
                 }
             }
         });
