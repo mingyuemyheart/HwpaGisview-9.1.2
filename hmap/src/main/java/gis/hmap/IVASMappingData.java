@@ -27,7 +27,7 @@ public class IVASMappingData {
                 buildingId = feature.fieldValues[i];
             else if (feature.fieldNames[i].equalsIgnoreCase("FLOORLIST"))
                 floorList = feature.fieldValues[i].split(",");
-            else if (feature.fieldNames[i].equalsIgnoreCase("IVASPRODUCTIONBUILDINGID") && useTest == false)
+            else if (feature.fieldNames[i].equalsIgnoreCase("IVASPRODUCTIONBUILDINGID") && !useTest)
                 ivasBuildingId = feature.fieldValues[i];
             else if (feature.fieldNames[i].equalsIgnoreCase("IVASTESTBUILDINGID") && useTest)
                 ivasBuildingId = feature.fieldValues[i];

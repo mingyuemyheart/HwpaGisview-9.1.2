@@ -1,6 +1,7 @@
 package gis.gisdemo
 
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -26,8 +27,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListener, GeoServiceCallback, IndoorCallback, ZoomToIndoorListener,
         CalculateRouteListener, MarkerListener, BuildingListener, ModelListener, ZoomListener, MapListener, LocationListener, QueryCallback{
 
-    private val mPerms = arrayOf(
-            "android.permission.LOCATION_HARDWARE",
+    private val permissions = arrayOf(
             "android.permission.WRITE_EXTERNAL_STORAGE",
             "android.permission.ACCESS_FINE_LOCATION",
             "android.permission.READ_PHONE_STATE")
@@ -38,9 +38,39 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        checkPermissions()
+    }
+
+    /**
+     * 申请权限
+     */
+    private fun checkPermissions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            init()
+        } else {
+            if (!PermissionDetect.hasPermissions(this, *permissions)) {
+                ActivityCompat.requestPermissions(this, permissions, 1001)
+            } else {
+                init()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1001 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    init()
+                }
+            }
+        }
+    }
+
+    private fun init() {
         initToolbar()
         initMap()
-        checkPermission()
+        initLocation()
     }
 
     private fun initToolbar() {
@@ -60,29 +90,10 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                         GeneralMarker(null, null, resources.getDrawable(R.drawable.door, null), 32, 32, null)))
     }
 
-    private fun checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!PermissionDetect.hasPermissions(this, *mPerms)) {
-                ActivityCompat.requestPermissions(this, mPerms, 1001)
-            } else {
-                initLoc()
-            }
-        } else {
-            initLoc()
-        }
-    }
-
     /**
-     * 权限的结果回调函数
+     * 初始化混合定位
      */
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1001) {
-        }
-        initLoc()
-    }
-
-    private fun initLoc() {
+    private fun initLocation() {
         GisView.initEngine(applicationContext,
                 "NzNhZDZkYzgtYmQyNy00MmQ3LWJjY2UtOGY2YTViZmVhYTYy",
                 "xgAUPmQsEPU+iwt+TNJZ7va+Td5ri3EgHp6+pSNS0jY",

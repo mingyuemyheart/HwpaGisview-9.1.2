@@ -33,7 +33,7 @@ class BlankActivity : Activity() {
         GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
         GisView.setLocDecoder(true, object : IVASMappingListener {//获取IVAS数据
             override fun onIVASMappingSuccess(iVasMapping: MutableList<IVASMappingData>?) {
-            mUIHandler.post {
+                mUIHandler.post {
                     for (i in 0 until iVasMapping!!.size) {
                         Log.e("onIVASMappingSuccess$i", iVasMapping[i].ivasBuildingId)
                     }
