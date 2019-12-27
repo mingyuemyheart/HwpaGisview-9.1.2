@@ -71,6 +71,9 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         this.logEnable = logEnable;
     }
 
+    private int indoorZIndex = -10;//室内地图
+    private int parkingZIndex = -9;//室内停车场
+
     private static final String calculatdRouteKey = "[calculatdRoute]";
     private static final String indoorKeyTemplate = "indoor[building:%s]";
     private static final String basementKeyTemplate = "indoor[basement:%s]";
@@ -374,6 +377,18 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             //设置场景模式后最好调用一次stop，再调用start以保证场景模式生效
             mLocationClient.stopLocation();
 //            mLocationClient.startLocation();
+        }
+    }
+
+    /**
+     * 设置地图宽高
+     * @param width
+     * @param height
+     */
+    public void setGisViewLayoutParams(int width, int height) {
+        if (mapView != null) {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+            mapView.setLayoutParams(params);
         }
     }
 
@@ -739,22 +754,20 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                     Map.Entry<String, IndoorMapData> entry = (Map.Entry<String, IndoorMapData>) iter.next();
                     IndoorMapData indoorMapData = entry.getValue();
                     for (ModelData modelData : indoorMapData.rooms) {
-                        boolean isHit = false;
+                        boolean isHit;
                         if (modelData.geometry != null) {
                             for (List<Point2D> geoPoints : modelData.geometry) {
                                 isHit = QueryUtils.isInPolygon(point2D, geoPoints.toArray(new Point2D[0]));
-                                if (isHit)
+                                if (isHit) {
+                                    ModelEvent me = new ModelEvent(
+                                            TargetEvent.Press,
+                                            new double[]{point2D.x, point2D.y},
+                                            modelData.features);
+                                    for (ModelListener listener : mModelListener)
+                                        listener.modelEvent(me);
                                     break;
+                                }
                             }
-                        }
-                        if (isHit) {
-                            ModelEvent me = new ModelEvent(
-                                    TargetEvent.Press,
-                                    new double[]{point2D.x, point2D.y},
-                                    modelData.features);
-                            for (ModelListener listener : mModelListener)
-                                listener.modelEvent(me);
-                            break;
                         }
                     }
                 }
@@ -1663,22 +1676,36 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
-    public void showIndoorMap(String buildingId, String floorid, IndoorCallback callback) {
-        indoorCallback = callback;
-        swichIndoorMap(buildingId, floorid);
-    }
+
+    public static final String TYPE_NORMAL = "type_normal";//普通类型
+    public static final String TYPE_PARKING = "type_parking";//停车位类型
 
     /**
-     * 显示室内地图
+     * 绘制室内地图
      * @param buildingId
      * @param floorid
      */
     public void showIndoorMap(String buildingId, String floorid) {
-        swichIndoorMap(buildingId, floorid);
+        showIndoorMap(buildingId, floorid, null);
     }
 
+    /**
+     * 绘制室内地图
+     * @param buildingId
+     * @param floorid
+     */
+    public void showIndoorMap(String buildingId, String floorid, IndoorCallback callback) {
+        showIndoorMap(TYPE_NORMAL, buildingId, floorid, callback);
+    }
 
-    private void swichIndoorMap(String buildingId, String floorid) {
+    /**
+     * 绘制室内地图
+     * @param indoorType 室内地图样式，"type_normal";//普通类型   "type_parking";//停车位类型
+     * @param buildingId
+     * @param floorid
+     */
+    public void showIndoorMap(String indoorType, String buildingId, String floorid, IndoorCallback callback) {
+        indoorCallback = callback;
         Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap: buildingId=%s; floorid=%s", buildingId, floorid));
         if (TextUtils.isEmpty(floorid)) {
             clearOpensMap();
@@ -1703,16 +1730,17 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             clearOpensMap();
             currIndoorMap = newIndoorMap;
 
-            if (TextUtils.isEmpty(realBuildingId)) {
-                QueryUtils.BasementMapResult basementMapResult = GisDataCache.getBasement(floorid);
-                if (basementMapResult != null) {
-                    Message msg = new Message();
-                    msg.obj = basementMapResult;
-                    msg.what = Common.QUERY_BASEMENT_MAP;
-                    handler.sendMessage(msg);
-                } else
-                    QueryUtils.queryBasementMap(Common.parkId(), floorid, handler);
-            } else {
+            if (TextUtils.equals(indoorType, TYPE_PARKING)) {//室内停车场
+//                QueryUtils.BasementMapResult basementMapResult = GisDataCache.getBasement(floorid);
+//                if (basementMapResult != null) {
+//                    Message msg = new Message();
+//                    msg.obj = basementMapResult;
+//                    msg.what = Common.QUERY_BASEMENT_MAP;
+//                    handler.sendMessage(msg);
+//                } else {
+                    QueryUtils.queryBasementMap(Common.parkId(), realBuildingId, floorid, handler);
+//                }
+            } else {//室内地图正常样式
 //                Feature buildingFeature = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getBuilding(realBuildingId);
 //                Feature[] floorFeatures = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getFloor(realBuildingId, floorid);
 //                if (floorFeatures != null && floorFeatures.length > 0 ) {
@@ -1869,7 +1897,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                             ov.setShowPoints(false);
                             ov.setData(points);
                             ov.setKey(keyvalue + smId);
-                            ov.setZIndex(-1);
+                            ov.setZIndex(indoorZIndex);
                             ovls.add(ov);
                             mapView.getOverlays().add(ov);
                         }
@@ -1955,10 +1983,17 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         NetWorkAnalystUtil.excutePathService(mapView, start, end, way, ps, handler);
     }
 
+    /**
+     * 路径规划回调
+     * @param listener
+     */
     public void addRouteListener(CalculateRouteListener listener) {
         mCalculateRouteListener = listener;
     }
 
+    /**
+     * 清除路径规划回调
+     */
     public void removeRouteListener() {
         mCalculateRouteListener = null;
     }
@@ -2112,31 +2147,47 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
-    public void showModelHighlight(String parkId, int[] modId) {
-        List<int[]> ids = new ArrayList<>();
+    /**
+     * 模型高亮
+     * @param parkId
+     * @param buildingId
+     * @param modId
+     */
+    public void showModelHighlight(String parkId, String buildingId, String floorid, String[] modId) {
+        List<String[]> ids = new ArrayList<>();
         ids.add(modId);
+
+        //高亮样式
         List<PresentationStyle> pss = new ArrayList<>();
         PresentationStyle hps = new PresentationStyle();
-        hps.lineWidth = 1;
+        hps.lineWidth = 5;
         hps.fillColor = Color.parseColor("#5CE7FF");
         hps.opacity = 150;
         pss.add(hps);
-        PresentationStyle ps = new PresentationStyle();
-        ps.lineWidth = 1;
-        ps.fillColor = Color.parseColor("#2B94BF");
-        ps.opacity = 150;
-        showModelHighlight(ids, pss, ps);
+
+        //默认样式
+        PresentationStyle normal = new PresentationStyle();
+        normal.lineWidth = 5;
+        normal.fillColor = Color.parseColor("#2B94BF");
+        normal.opacity = 150;
+
+        showModelHighlight(ids, buildingId, floorid, pss, normal);
     }
 
     /**
      * 模型高亮
      * @param modIds
      * @param pss
-     * @param other
+     * @param normal
      */
-    public void showModelHighlight(List<int[]> modIds, List<PresentationStyle> pss, PresentationStyle other) {
+    public void showModelHighlight(List<String[]> modIds, String buildingId, String floorid, List<PresentationStyle> pss, PresentationStyle normal) {
         isShowHighLight = true;
-        QueryUtils.queryModel(modIds, pss, other, handler);
+        String realBuildingId = buildingId;
+        BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorid);
+        if (data != null) {
+            realBuildingId = data.targetId;
+        }
+        QueryUtils.queryModel(modIds, realBuildingId, floorid, pss, normal, handler);
     }
 
     /**
@@ -2590,6 +2641,10 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         mapView.invalidate();
     }
 
+    /**
+     * 渲染室内地图
+     * @param indoor
+     */
     private void renderIndoorMap(IndoorMapData indoor) {
         String indoorKey = String.format(indoorKeyTemplate, indoor.buildingId);
         List<Overlay> ovls = null;
@@ -2714,7 +2769,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             if (needNewOverlay) {
                 DrawableOverlay floorOverlay = new DrawableOverlay();
                 floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
-                floorOverlay.setZIndex(-1);
+                floorOverlay.setZIndex(indoorZIndex);
                 ovls.add(floorOverlay);
                 mapView.getOverlays().add(floorOverlay);
             } else {
@@ -2735,6 +2790,10 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
+    /**
+     * 绘制地下室
+     * @param basement
+     */
     private void renderBasementMap(QueryUtils.BasementMapResult basement) {
         String basementKey = String.format(basementKeyTemplate, basement.floorId);
         List<Overlay> ovls = null;
@@ -2832,6 +2891,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             }
             if (needNewOverlay) {
                 DrawableOverlay floorOverlay = new DrawableOverlay();
+                floorOverlay.setZIndex(parkingZIndex);
                 floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
                 ovls.add(floorOverlay);
                 mapView.getOverlays().add(floorOverlay);
@@ -2839,6 +2899,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 for (Overlay overlay : ovls) {
                     if (overlay instanceof DrawableOverlay) {
                         DrawableOverlay floorOverlay = (DrawableOverlay) overlay;
+                        floorOverlay.setZIndex(parkingZIndex);
                         floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
                         break;
                     }
@@ -3117,6 +3178,10 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         mapView.invalidate();
     }
 
+    /**
+     * 渲染模型高亮
+     * @param model
+     */
     private void renderModel(QueryUtils.ModelResult model) {
         List<Overlay> ovls;
         if (namedOverlays.containsKey(modelsKey)) {
@@ -3130,25 +3195,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
 
         if (isShowHighLight) {
-            if (model.normalGeometry != null) {
-                Paint normalPaint = new Paint();
-                normalPaint.setAntiAlias(true);
-                normalPaint.setColor(model.normalStyle.fillColor);
-                normalPaint.setAlpha(model.normalStyle.opacity);
-                normalPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-                normalPaint.setStrokeJoin(Paint.Join.ROUND);
-                normalPaint.setStrokeWidth(model.normalStyle.lineWidth);
-
-                for (List<Point2D> point2DS : model.normalGeometry) {
-                    if (point2DS.size() > 0) {
-                        PolygonOverlay lot = new PolygonOverlay(normalPaint);
-                        lot.setShowPoints(false);
-                        lot.setData(point2DS);
-                        ovls.add(lot);
-                    }
-                }
-            }
-
+            //高亮样式
             if (model.highlightGeometry != null) {
                 for (int i=0; i<model.highlightGeometry.size(); i++) {
                     List<Point2D> point2DS = model.highlightGeometry.get(i);
@@ -3163,6 +3210,26 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                         paint.setStrokeWidth(ps.lineWidth);
 
                         PolygonOverlay lot = new PolygonOverlay(paint);
+                        lot.setShowPoints(false);
+                        lot.setData(point2DS);
+                        ovls.add(lot);
+                    }
+                }
+            }
+
+            //默认样式
+            if (model.normalGeometry != null) {
+                Paint normalPaint = new Paint();
+                normalPaint.setAntiAlias(true);
+                normalPaint.setColor(model.normalStyle.fillColor);
+                normalPaint.setAlpha(model.normalStyle.opacity);
+                normalPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                normalPaint.setStrokeJoin(Paint.Join.ROUND);
+                normalPaint.setStrokeWidth(model.normalStyle.lineWidth);
+
+                for (List<Point2D> point2DS : model.normalGeometry) {
+                    if (point2DS.size() > 0) {
+                        PolygonOverlay lot = new PolygonOverlay(normalPaint);
                         lot.setShowPoints(false);
                         lot.setData(point2DS);
                         ovls.add(lot);

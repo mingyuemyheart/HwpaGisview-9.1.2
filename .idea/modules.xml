@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/HwpaGisview.iml" filepath="$PROJECT_DIR$/HwpaGisview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/HwpaGisview-app.iml" filepath="$PROJECT_DIR$/app/HwpaGisview-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hmap/HwpaGisview-hmap.iml" filepath="$PROJECT_DIR$/hmap/HwpaGisview-hmap.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/gisview-src-noivas-1119-2.iml" filepath="$PROJECT_DIR$/gisview-src-noivas-1119-2.iml" />
       <module fileurl="file://$PROJECT_DIR$/hmap/hmap.iml" filepath="$PROJECT_DIR$/hmap/hmap.iml" />

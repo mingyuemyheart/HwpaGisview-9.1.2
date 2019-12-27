@@ -38,6 +38,14 @@
             android:id="@+id/unloadMap"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="销毁地图" />
+        <item
+            android:id="@+id/fullScreen"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="全屏显示" />
+        <item
+            android:id="@+id/partScreen"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="指定大小显示" />
     </group>
 
     <group
@@ -191,13 +199,17 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="隐藏周界" />
         <item
-            android:id="@+id/modalHighlight"
+            android:id="@+id/parking1"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="模型高亮" />
+            android:title="J01高亮" />
+        <item
+            android:id="@+id/parking2"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="J5MB高亮" />
         <item
             android:id="@+id/disableHighlight"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="取消模型高亮" />
+            android:title="清除高亮" />
     </group>
 
     <group

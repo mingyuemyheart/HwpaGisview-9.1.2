@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
+import android.widget.RelativeLayout
 import android.widget.Toast
 import gis.hmap.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -82,7 +83,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
 
     private fun initMap() {
         gisView.setLogEnable(true)
-        gisView.setMaxZoomLevel(8)
+        gisView.setMaxZoomLevel(18)
         gisView.loadMap(5, doubleArrayOf(22.6573017046106460, 114.0576151013374200))
         gisView.setRouteFacility(
                 arrayOf("Lift", "InOut"),
@@ -120,6 +121,8 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.zoomIn -> gisView.zoomInMap()
             R.id.zoomOut -> gisView.zoomOutMap()
             R.id.unloadMap -> gisView.destroyMap()
+            R.id.fullScreen -> gisView.setGisViewLayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT)
+            R.id.partScreen -> gisView.setGisViewLayoutParams(500, 500)
 
 
             R.id.hidelevel -> gisView.setHideLevel(2)
@@ -133,27 +136,23 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
 
 
             R.id.addMarker -> {
-                val drawable = R.layout.layout_marker.layoutToDrawable()
-                val markers = arrayOfNulls<GeneralMarker>(2)
-                for (i in 0 .. 1) {
-                    val generalMarker = GeneralMarker()
-                    generalMarker.position = doubleArrayOf(22.655299, 114.058249)
-                    generalMarker.markerId = String.format("layout_marker%d", cnt++)
-                    generalMarker.image = drawable
-                    generalMarker.width = 96
-                    generalMarker.height = 96
-                    generalMarker.tag = null
-                    markers[i] = generalMarker
-                }
-//                val markers = arrayOf(
-//                        GeneralMarker(doubleArrayOf(22.655299, 114.058249),
-//                        String.format("layout_marker%d", cnt++),
-//                        drawable,
-//                        128, 128, null),
-//                        GeneralMarker(doubleArrayOf(22.650246, 114.052121),
-//                        String.format("layout_marker%d", cnt++),
-//                        resources.getDrawable(R.drawable.marker_2, null),
-//                        128, 128, null))
+//                val drawable = R.layout.layout_marker.layoutToDrawable()
+//                val markers = arrayOfNulls<GeneralMarker>(2)
+//                for (i in 0 .. 1) {
+//                    val generalMarker = GeneralMarker()
+//                    generalMarker.position = doubleArrayOf(22.655299, 114.058249)
+//                    generalMarker.markerId = String.format("layout_marker%d", cnt++)
+//                    generalMarker.image = drawable
+//                    generalMarker.width = 96
+//                    generalMarker.height = 96
+//                    generalMarker.tag = null
+//                    markers[i] = generalMarker
+//                }
+                val markers = arrayOf(
+                        GeneralMarker(doubleArrayOf(22.655299, 114.058249),
+                        String.format("layout_marker%d", cnt++),
+                        resources.getDrawable(R.drawable.red_marker, null),
+                        128, 128, null))
                 gisView.addMarker("lm01", 999, markers)
             }
             R.id.addMarkerUrl -> {
@@ -392,28 +391,13 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                         intArrayOf(10, 12))
             }
             R.id.removePerimeter -> gisView.removePerimeter()
-            R.id.modalHighlight -> {
-                gisView.showIndoorMap("", "B01")
-//            gisView.showModelHighlight(Common.parkId(), intArrayOf(1,2,3))
-                val ids = ArrayList<IntArray>()
-                ids.add(intArrayOf(1, 2, 3))
-                ids.add(intArrayOf(41, 42, 43))
-                val pss = ArrayList<PresentationStyle>()
-                var ps = PresentationStyle()
-                ps.opacity = 150
-                ps.lineWidth = 1
-                ps.fillColor = Color.parseColor("#EE2222")
-                pss.add(ps)
-                ps = PresentationStyle()
-                ps.opacity = 150
-                ps.lineWidth = 1
-                ps.fillColor = Color.parseColor("#EEEE22")
-                pss.add(ps)
-                ps = PresentationStyle()
-                ps.opacity = 150
-                ps.lineWidth = 1
-                ps.fillColor = Color.parseColor("#2B94BF")
-                gisView.showModelHighlight(ids, pss, ps)
+            R.id.parking1 -> {
+                gisView.showIndoorMap(GisView.TYPE_PARKING, "J01", "B01", this)
+                gisView.showModelHighlight(Common.parkId(), "J01", "B01", arrayOf("A22","A21","C23","B55","车位"))
+            }
+            R.id.parking2 -> {
+                gisView.showIndoorMap(GisView.TYPE_PARKING, "J5MB", "B01", this)
+                gisView.showModelHighlight(Common.parkId(), "J5MB", "B01", arrayOf("车位","车位","车位"))
             }
             R.id.disableHighlight -> {
                 gisView.removeModelhighlighting()

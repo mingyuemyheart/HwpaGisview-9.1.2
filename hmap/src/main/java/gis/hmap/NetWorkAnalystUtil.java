@@ -168,22 +168,6 @@ class NetWorkAnalystUtil {
                 }
             }
 
-
-//            if (pathResult != null && pathResult.pathList != null) {
-//                Path[] pathList = pathResult.pathList;
-//                List<List<Point2D>> pointsList = new ArrayList<List<Point2D>>();
-//                for (int i = 0; i < pathList.length; i++) {
-//                    List<Point2D> points = new ArrayList<Point2D>();
-//                    Route route = pathList[i].route;
-//                    if (route != null && route.points != null) {
-//                        for (int k = 0; k < route.points.length; k++) {
-//                            points.add(new Point2D(route.points[k].x, route.points[k].y));
-//                        }
-//                    }
-//                    pointsList.add(points);
-//                }
-//            }
-
             Message msg = new Message();
             msg.obj = result;
             msg.what = Common.ANALYST_ROUTE;

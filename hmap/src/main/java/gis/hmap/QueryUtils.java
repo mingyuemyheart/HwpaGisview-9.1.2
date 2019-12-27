@@ -2,6 +2,7 @@ package gis.hmap;
 
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.supermap.android.commons.EventStatus;
@@ -37,6 +38,11 @@ import java.util.List;
         }
     }
 
+    /**
+     * 查询building信息
+     * @param name
+     * @param handler
+     */
     public static void queryAllBuildings(String name, Handler handler) {
         new Thread(new QueryAllBuildingsRunnable(name, handler)).start();
     }
@@ -89,6 +95,13 @@ import java.util.List;
         }
     }
 
+    /**
+     * 查询室内地图
+     * @param mapId
+     * @param buildingId
+     * @param florid
+     * @param handler
+     */
     public static void queryIndoorMap(String mapId, String buildingId, String florid, Handler handler) {
         new Thread(new QueryIndoorMapRunnable(mapId, buildingId, florid, handler)).start();
     }
@@ -267,17 +280,26 @@ import java.util.List;
         }
     }
 
-    public static void queryBasementMap(String mapId, String florid, Handler handler) {
-        new Thread(new QueryBasementMapRunnable(mapId, florid, handler)).start();
+    /**
+     * 查询地下室停车场
+     * @param mapId
+     * @param buildingId
+     * @param florid
+     * @param handler
+     */
+    public static void queryBasementMap(String mapId, String buildingId, String florid, Handler handler) {
+        new Thread(new QueryBasementMapRunnable(mapId, buildingId, florid, handler)).start();
     }
 
     private static class QueryBasementMapRunnable implements Runnable {
         String mapId;
+        String buildingId;
         String florid;
         Handler handler;
 
-        public QueryBasementMapRunnable(String mapId, String florid, Handler handler) {
+        public QueryBasementMapRunnable(String mapId, String buildingId, String florid, Handler handler) {
             this.mapId = mapId;
+            this.buildingId = buildingId;
             this.florid = florid;
             this.handler = handler;
         }
@@ -288,8 +310,10 @@ import java.util.List;
             sqlParameters.datasetNames = new String[] { Common.parkId()+":"+florid };
             sqlParameters.toIndex = 99999;
             QueryParameter queryParameter = new QueryParameter();
+            queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
+            Log.e("QueryBasementMap", Common.getHost() + Common.DATA_URL());
             GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
@@ -334,7 +358,6 @@ import java.util.List;
             }
 
             sqlParameters.datasetNames = new String[] { Common.parkId()+":"+florid+"_LINE" };
-
             sqlService.process(sqlParameters, listener);
             try {
                 listener.waitUntilProcessed();
@@ -500,30 +523,43 @@ import java.util.List;
         }
     }
 
-    public static void queryModel(List<int[]> modIds, List<PresentationStyle> pss, PresentationStyle other, Handler handler) {
-        new Thread(new QueryModelRunnable(modIds, pss, other, handler)).start();
+    /**
+     * 查询模型高亮（车位）
+     * @param modIds
+     * @param buildingId
+     * @param floorid
+     * @param pss
+     * @param normal
+     * @param handler
+     */
+    public static void queryModel(List<String[]> modIds, String buildingId, String floorid, List<PresentationStyle> pss, PresentationStyle normal, Handler handler) {
+        new Thread(new QueryModelRunnable(modIds, buildingId, floorid, pss, normal, handler)).start();
     }
 
     private static class QueryModelRunnable implements Runnable {
-        private List<int[]> modIds;
+        private List<String[]> modIds;
+        private String buildingId;
+        private String floorid;
         private List<PresentationStyle> pss;
-        private PresentationStyle other;
+        private PresentationStyle normal;
         private Handler handler;
 
-        public QueryModelRunnable(List<int[]> modIds, List<PresentationStyle> pss, PresentationStyle other, Handler handler) {
+        public QueryModelRunnable(List<String[]> modIds, String buildingId, String floorid, List<PresentationStyle> pss, PresentationStyle normal, Handler handler) {
             this.modIds = modIds;
+            this.buildingId = buildingId;
+            this.floorid = floorid;
             this.pss = pss;
-            this.other = other;
+            this.normal = normal;
             this.handler = handler;
         }
 
         @Override
         public void run() {
             GetFeaturesBySQLParameters sqlParameters = new GetFeaturesBySQLParameters();
-            sqlParameters.datasetNames = new String[] { Common.parkId() + ":PARKING" };
+            sqlParameters.datasetNames = new String[] {String.format("%s:%s_parking", Common.parkId(), floorid)};
             sqlParameters.toIndex = 9999;
             QueryParameter queryParameter = new QueryParameter();
-            queryParameter.name = "PARKING@" + Common.parkId();
+            queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
             GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
@@ -544,12 +580,13 @@ import java.util.List;
                 highlightStyle = new ArrayList<>();
                 normalGeometry = new ArrayList<>();
                 for (Feature feature : model.features) {
+                    Log.e("parkingId", feature.fieldValues[27]);
                     boolean isHighLight = false;
                     int index = 0;
                     if (modIds != null)
-                    for (int[] ids : modIds) {
-                        for (int highlights : ids) {
-                            if (feature.getID() == highlights) {
+                    for (String[] ids : modIds) {
+                        for (String highlights : ids) {
+                            if (TextUtils.equals(feature.fieldValues[27], highlights)) {
                                 isHighLight = true;
                                 break;
                             }
@@ -570,7 +607,7 @@ import java.util.List;
                                 if (pss != null && pss.size() > index)
                                     highlightStyle.add(pss.get(index));
                                 else
-                                    highlightStyle.add(other);
+                                    highlightStyle.add(normal);
                             }
                             else
                                 normalGeometry.add(partList);
@@ -582,7 +619,7 @@ import java.util.List;
                             if (pss != null && pss.size() > index)
                                 highlightStyle.add(pss.get(index));
                             else
-                                highlightStyle.add(other);
+                                highlightStyle.add(normal);
                         }
                         else
                             normalGeometry.add(geoPoints);
@@ -591,7 +628,7 @@ import java.util.List;
             }
 
             if (highlightGeometry != null || normalGeometry != null) {
-                ModelResult data = new ModelResult(highlightGeometry, highlightStyle, normalGeometry, other);
+                ModelResult data = new ModelResult(highlightGeometry, highlightStyle, normalGeometry, normal);
                 Message msg = new Message();
                 msg.obj = data;
                 msg.what = Common.QUERY_MODEL;
