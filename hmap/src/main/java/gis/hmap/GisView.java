@@ -2151,7 +2151,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * 模型高亮
      * @param parkId
      * @param buildingId
-     * @param modId
+     * @param modId 车位编号
      */
     public void showModelHighlight(String parkId, String buildingId, String floorid, String[] modId) {
         List<String[]> ids = new ArrayList<>();

@@ -87,6 +87,11 @@ public class Common {
         _instance.parkCenterNameY = centerYName;
     }
 
+    /**
+     * 设置当前园区信息
+     * @param workspace
+     * @param parkId
+     */
     public static void setCurrentZone(String workspace, String parkId) {
         if (_instance == null)
             _instance = new Common();

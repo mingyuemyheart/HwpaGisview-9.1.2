@@ -460,6 +460,8 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.delmaptap -> gisView.removeMapListener(this)
             R.id.addloc -> GisView.addLocateListener(this)
             R.id.delloc -> GisView.removeLocateListener(this)
+            R.id.addRoute -> gisView.addRouteListener(this)
+            R.id.delRoute -> gisView.removeRouteListener()
             R.id.startloc -> gisView.startLocate()
             R.id.stoploc -> gisView.stopLocate()
         }
