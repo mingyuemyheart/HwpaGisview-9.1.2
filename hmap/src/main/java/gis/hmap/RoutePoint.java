@@ -42,4 +42,12 @@ public class RoutePoint {
         this.mkWidth = mkWidth;
         this.mkHeight = mkHeight;
     }
+
+    //获取路径规划数据
+    public RoutePoint(double[] coords, String buildingId, String floorid) {
+        this.coords = coords;
+        this.buildingId = buildingId;
+        this.floorid = floorid;
+    }
+
 }

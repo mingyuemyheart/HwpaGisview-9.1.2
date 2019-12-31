@@ -287,7 +287,8 @@ public class Common {
     public static final int QUERY_PERIMETER = 12;
     public static final int QUERY_MODEL = 13;
     public static final int QUERY_BASEMENT_MAP = 14;
-    public static final int ANALYST_ROUTE = 101;
+    public static final int ANALYST_ROUTE = 101;//路径规划绘制
+    public static final int PATH_PLAN_DATA = 102;//获取路径规划数据
     public static final int HEAT_MAP_CALC_END = 201;
     public static final int EVENT_MAP_TAP = 301;
     public static final int START_TIMER = 0;

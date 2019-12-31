@@ -113,7 +113,8 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     protected int indoorZoomLevel = 0;//室内地图默认缩放值
     protected ZoomToIndoorListener mZoomToIndoorListener;//室内地图缩放事件
     protected String defaultZoomIndoor = "F01";//室内地图默认楼层
-    protected CalculateRouteListener mCalculateRouteListener;
+    protected CalculateRouteListener mCalculateRouteListener;//路径规划绘制
+    protected PathPlanDataListener pathPlanDataListener;//获取路径规划数据
     protected static boolean autoClearCachedTiles = false;
     protected MapCacheListener mMapCacheListener;
     protected MapLoadedListener mMapLoadedListener;
@@ -355,6 +356,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         defaultFacilities = new HashMap<>();
         mZoomToIndoorListener = null;
         mCalculateRouteListener = null;
+        pathPlanDataListener = null;
         mMapCacheListener = null;
         mMapLoadedListener = null;
         mMapMoveListener = new ArrayList<>();
@@ -1964,6 +1966,30 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         mapView.invalidate();
     }
 
+    /**
+     * 获取路径规划数据
+     * @param start
+     * @param end
+     */
+    public void getPathPlanData(RoutePoint start, RoutePoint end) {
+        PathPlanDataUtil.excutePathService(mapView, start, end, handler);
+    }
+
+    /**
+     * 获取路径规划数据回调
+     * @param listener
+     */
+    public void getPathPlanDataListener(PathPlanDataListener listener) {
+        pathPlanDataListener = listener;
+    }
+
+    /**
+     * 清除获取路径规划数据回调
+     */
+    public void removePathPlanDataListener() {
+        pathPlanDataListener = null;
+    }
+
     public void calcRoutePath(RoutePoint start, RoutePoint end, RoutePoint[] way) {
         PresentationStyle ps = new PresentationStyle();
         ps.lineWidth = 20;
@@ -2540,10 +2566,20 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                     QueryUtils.ModelResult model = (QueryUtils.ModelResult) msg.obj;
                     host.renderModel(model);
                     break;
+                case Common.PATH_PLAN_DATA:
+                    List<Point2D> point2DS = (ArrayList<Point2D>) msg.obj;
+                    if (host.pathPlanDataListener != null) {
+                        if (point2DS != null && point2DS.size() > 0) {
+                            host.pathPlanDataListener.pathPlanDataSuccess(point2DS);
+                        } else {
+                            host.pathPlanDataListener.pathPlanDataFailed("查询失败");
+                        }
+                    }
+                    break;
                 case Common.ANALYST_ROUTE:
                     NetWorkAnalystUtil.CalculatedRoute route = (NetWorkAnalystUtil.CalculatedRoute) msg.obj;
                     if (route == null) {
-                         if (host.mCalculateRouteListener != null)
+                        if (host.mCalculateRouteListener != null)
                             host.mCalculateRouteListener.calculateRouteEvent(new RouteEvent(false, 0));
                     } else if (route.route == null) {
                         if (host.mCalculateRouteListener != null)
@@ -2914,6 +2950,10 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
+    /**
+     * 绘制路径规划路线
+     * @param route
+     */
     private void renderCalculatedRoute(NetWorkAnalystUtil.CalculatedRoute route) {
         List<Overlay> ovls;
         if (namedOverlays.containsKey(calculatdRouteKey)) {
@@ -3003,20 +3043,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             }
             index++;
         }
-//        for (List<Point2D> point2DS : route.route) {
-//            if (point2DS.size() > 0) {
-//                if (route.start != null)
-//                    point2DS.add(0, new Point2D(route.start.coords[1], route.start.coords[0]));
-//                if (route.end != null)
-//                    point2DS.add(new Point2D(route.end.coords[1], route.end.coords[0]));
-//                LineOverlay overlay = new LineOverlay(paint);
-//                overlay.setLinePaint(paint);
-//                overlay.setPointPaint(paint);
-//                overlay.setShowPoints(false);
-//                overlay.setData(point2DS);
-//                ovls.add(overlay);
-//            }
-//        }
 
         DefaultItemizedOverlay overlay = new DefaultItemizedOverlay(null);
         Marker marker;

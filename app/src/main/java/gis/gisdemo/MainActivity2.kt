@@ -22,11 +22,13 @@ import android.view.View
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.Toast
+import com.supermap.android.maps.Point2D
 import gis.hmap.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListener, GeoServiceCallback, IndoorCallback, ZoomToIndoorListener,
-        CalculateRouteListener, MarkerListener, BuildingListener, ModelListener, ZoomListener, MapListener, LocationListener, QueryCallback{
+        CalculateRouteListener, MarkerListener, BuildingListener, ModelListener, ZoomListener, MapListener, LocationListener, QueryCallback,
+        PathPlanDataListener {
 
     private val permissions = arrayOf(
             "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -430,6 +432,9 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                         ps)
             }
             R.id.clearRoute -> gisView.clearPath()
+            R.id.pathPlanData -> gisView.getPathPlanData(
+                    RoutePoint(doubleArrayOf(22.655674, 114.05721), "J01", "F01"),
+                    RoutePoint(doubleArrayOf(22.65592, 114.05719), "J01", "F01"))
             R.id.showHeatmap -> {
                 //生成热力图
                 //22.972860320987436, 113.35606992244722
@@ -462,6 +467,8 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.delloc -> GisView.removeLocateListener(this)
             R.id.addRoute -> gisView.addRouteListener(this)
             R.id.delRoute -> gisView.removeRouteListener()
+            R.id.addPathPlan -> gisView.getPathPlanDataListener(this)
+            R.id.delPathPlan -> gisView.removePathPlanDataListener()
             R.id.startloc -> gisView.startLocate()
             R.id.stoploc -> gisView.stopLocate()
         }
@@ -524,6 +531,23 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             val str = String.format("%s, 路径长度=%f", if (event!!.success) "成功" else "路径规划失败", event.totalLength)
             Toast.makeText(this@MainActivity2, str, Toast.LENGTH_LONG).show()
         }
+    }
+
+    /**
+     * 获取路径规划数据成功回调
+     */
+    override fun pathPlanDataSuccess(point2DS: MutableList<Point2D>?) {
+        for (i in 0 until point2DS!!.size) {
+            val point = point2DS[i]
+            Log.e("pathPlanDataSuccess", String.format("%s---%s", point.x, point.y))
+        }
+    }
+
+    /**
+     * 获取路径规划数据失败回调
+     */
+    override fun pathPlanDataFailed(msg: String?) {
+        Toast.makeText(this@MainActivity2, msg, Toast.LENGTH_SHORT).show()
     }
 
     /**

@@ -15,47 +15,34 @@ import com.supermap.android.networkAnalyst.FindPathService;
 import com.supermap.android.networkAnalyst.TransportationAnalystParameter;
 import com.supermap.android.networkAnalyst.TransportationAnalystResultSetting;
 import com.supermap.services.components.commontypes.Path;
-import com.supermap.services.components.commontypes.Route;
 
-import java.sql.DataTruncation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
 /**
- * Created by Ryan on 2018/10/17.
+ * 获取路径规划数据
  */
+public class PathPlanDataUtil {
 
-class NetWorkAnalystUtil {
-
-    public static class CalculatedRoute {
+    public static class PathPlanData {
         public RoutePoint start;
         public RoutePoint end;
-        public RoutePoint[] way;
-        public PresentationStyle presentationStyle;
         public List<Path[]> route;
         public List<String> range;
         public List<List<WayPoint>> wayPoints;
 
-        public CalculatedRoute(RoutePoint start, RoutePoint end, RoutePoint[] way, PresentationStyle ps) {
+        public PathPlanData(RoutePoint start, RoutePoint end) {
             this.start = start;
             this.end = end;
-            this.way = way;
-            this.presentationStyle = ps;
             route = new ArrayList<>();
             range = new ArrayList<>();
         }
     }
 
-    public static void excutePathService(MapView mapView, RoutePoint start, RoutePoint end, RoutePoint[] way, PresentationStyle ps, Handler handler) {
-        String msg = String.format("calcRoutePath:\r\n start => buildingId=%s, floorid=%s, coords=[%f, %f]\r\n", start.buildingId, start.floorid, start.coords[0], start.coords[1]);
-        for (RoutePoint rp : way) {
-            msg += String.format(" way => buildingId=%s, floorid=%s, coords=[%f, %f]\r\n", rp.buildingId, rp.floorid, rp.coords[0], rp.coords[1]);
-        }
-        msg += String.format(" end => buildingId=%s, floorid=%s, coords=[%f, %f]", end.buildingId, end.floorid, end.coords[0], end.coords[1]);
-        Common.getLogger(null).log(Level.INFO, msg);
-        Common.fixedThreadPool.execute(new PathServiceRunnable(mapView, start, end, way, ps, handler));
+    public static void excutePathService(MapView mapView, RoutePoint start, RoutePoint end, Handler handler) {
+        Common.fixedThreadPool.execute(new PathServiceRunnable(mapView, start, end, handler));
     }
 
     private static class PathServiceRunnable implements Runnable {
@@ -65,23 +52,13 @@ class NetWorkAnalystUtil {
         private HashMap<String, List<Point2D>> lift;
         private RoutePoint start;
         private RoutePoint end;
-        private RoutePoint[] way;
-        private PresentationStyle ps;
 
-        public PathServiceRunnable(MapView mapView, RoutePoint start, RoutePoint end, RoutePoint[] way, PresentationStyle ps, Handler handler) {
+        public PathServiceRunnable(MapView mapView, RoutePoint start, RoutePoint end, Handler handler) {
             BoundingBox boundingBox = mapView.getBounds();
             nodes = new ArrayList<>();
             if (start != null && start.coords != null && start.coords.length >= 2) {
                 if (boundingBox.contains(new Point2D(start.coords[1], start.coords[0])))
                     nodes.add(new WayPoint(start.coords[1], start.coords[0], start.buildingId, start.floorid));
-            }
-            if (way != null && way.length > 0) {
-                for (RoutePoint p : way) {
-                    if (p != null && p.coords != null && p.coords.length >= 2) {
-                        if (boundingBox.contains(new Point2D(p.coords[1], p.coords[0])))
-                            nodes.add(new WayPoint(p.coords[1], p.coords[0], p.buildingId, p.floorid));
-                    }
-                }
             }
             if (end != null && end.coords != null && end.coords.length >= 2) {
                 if (boundingBox.contains(new Point2D(end.coords[1], end.coords[0])))
@@ -90,8 +67,6 @@ class NetWorkAnalystUtil {
             this.handler = handler;
             this.start = start;
             this.end = end;
-            this.way = way;
-            this.ps = ps;
             inout = new HashMap<>();
             lift = new HashMap<>();
         }
@@ -127,7 +102,7 @@ class NetWorkAnalystUtil {
 
             FindPathParameters params = new FindPathParameters();
             params.parameter = analystParameter;
-            CalculatedRoute result = new CalculatedRoute(start, end, way, ps);
+            PathPlanData result = new PathPlanData(start, end);
             result.wayPoints = realNodes;
 
             for (List<WayPoint> waysec : realNodes) {
@@ -168,9 +143,26 @@ class NetWorkAnalystUtil {
                 }
             }
 
+            List<Point2D> point2DS = new ArrayList<>();
+            point2DS.add(new Point2D(start.coords[1], start.coords[0]));
+            // 绘制室外路线
+            for (int i = 0; i < result.range.size(); i++) {
+                com.supermap.services.components.commontypes.Path[] paths = result.route.get(i);
+                if (paths == null)
+                    continue;
+                for (com.supermap.services.components.commontypes.Path path : paths) {
+                    if (path.route != null && path.route.points != null && path.route.points.length > 0) {
+                        for (com.supermap.services.components.commontypes.Point2D point : path.route.points) {
+                            point2DS.add(new Point2D(point.x, point.y));
+                        }
+                    }
+                }
+            }
+            point2DS.add(new Point2D(end.coords[1], end.coords[0]));
+
             Message msg = new Message();
-            msg.obj = result;
-            msg.what = Common.ANALYST_ROUTE;
+            msg.obj = point2DS;
+            msg.what = Common.PATH_PLAN_DATA;
             handler.sendMessage(msg);
         }
 
@@ -424,247 +416,6 @@ class NetWorkAnalystUtil {
             return newNodes;
         }
 
-//        private List<List<WayPoint>> insertStageInoutLift() {
-//            List<List<WayPoint>> newNodes = new ArrayList<>();
-//            List<WayPoint> section = new ArrayList<>();
-//            for (int i=0; i<nodes.size()-1; i++) {
-//                WayPoint A = nodes.get(i);
-//                WayPoint B = nodes.get(i+1);
-//                section.add(A);
-//                try {
-//                    if (TextUtils.isEmpty(A.building) && TextUtils.isEmpty(A.floor) &&
-//                        TextUtils.isEmpty(B.building) && !TextUtils.isEmpty(B.floor)) {
-//                        // 从室外->出入口->电梯->地下室
-//                        WayPoint node = null, node2 = null;
-//                        node = findNearByInout(A, null);
-//                        if (node != null) {
-//                            node2 = new WayPoint(node.point.x, node.point.y, node.building, "F1", node.catalog);
-//                            section.add(node);
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        WayPoint pass = null;
-//                        if (node2 != null) {
-//                            section.add(node2);
-//                            pass = findNearByLift(node2, node2.building);
-//                            if (pass != null)
-//                                section.add(pass);
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (pass != null) {
-//                            pass = new WayPoint(pass.point.x, pass.point.y, "", B.floor, pass.catalog);
-//                            if (pass != null)
-//                                section.add(pass);
-//                        }
-//                    } else if (TextUtils.isEmpty(A.building) && TextUtils.isEmpty(A.floor) &&
-//                                !TextUtils.isEmpty(B.building) && !TextUtils.isEmpty(B.floor)) {
-//                        // 从室外->出入口->电梯->室内
-//                        WayPoint node = null, node2 = null;
-//                        node = findNearByInout(A, B.building);
-//                        if (node != null) {
-//                            node2 = new WayPoint(node.point.x, node.point.y, node.building, "F1", node.catalog);
-//                            section.add(node);
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (node2 != null)
-//                            section.add(node2);
-//                        if (B.floor != "F1") {
-//                            WayPoint pass = null;
-//                            if (node2 != null) {
-//                                pass = findNearByLift(node2, node2.building);
-//                                section.add(pass);
-//                            }
-//                            newNodes.add(section);
-//
-//                            section = new ArrayList<>();
-//                            if (pass != null) {
-//                                pass = new WayPoint(pass.point.x, pass.point.y, pass.building, B.floor, pass.catalog);
-//                                section.add(pass);
-//                            }
-//                        }
-//                    } else if (TextUtils.isEmpty(A.building) && !TextUtils.isEmpty(A.floor) &&
-//                                TextUtils.isEmpty(B.building) && TextUtils.isEmpty(B.floor)) {
-//                        // 从地下室->电梯->出入口->室外
-//                        WayPoint pass = findNearByLift(A, null);
-//                        if (pass != null)
-//                            section.add(pass);
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        WayPoint node = null, node2 = null;
-//                        if (pass != null) {
-//                            pass = new WayPoint(pass.point.x, pass.point.y, pass.building, "F1", pass.catalog);
-//                            if (pass != null) {
-//                                section.add(pass);
-//                                node = findNearByInout(pass, pass.building);
-//                                if (node != null) {
-//                                    node2 = new WayPoint(node.point.x, node.point.y, node.building, "", node.catalog);
-//                                    section.add(node);
-//                                }
-//                            }
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (node2 != null)
-//                            section.add(node2);
-//                    } else if (TextUtils.isEmpty(A.building) && !TextUtils.isEmpty(A.floor) &&
-//                                TextUtils.isEmpty(B.floor)) {
-//                        if (TextUtils.isEmpty(B.building)) {
-//                            // 从地下室->电梯->地下室
-//                            WayPoint pass = findNearByLift(A, null);
-//                            if (pass != null)
-//                                section.add(pass);
-//                            newNodes.add(section);
-//
-//                            section = new ArrayList<>();
-//                            if (pass != null) {
-//                                pass = new WayPoint(pass.point.x, pass.point.y, pass.building, B.floor, pass.catalog);
-//                                section.add(pass);
-//                            }
-//                        } else {
-//                            // 从地下室->电梯->室内
-//                            WayPoint pass = findNearByLift(A, B.building);
-//                            if (pass != null)
-//                                section.add(pass);
-//                            newNodes.add(section);
-//
-//                            section = new ArrayList<>();
-//                            if (pass != null) {
-//                                pass = new WayPoint(pass.point.x, pass.point.y, pass.building, B.floor, pass.catalog);
-//                                section.add(pass);
-//                            }
-//                        }
-//                    } else if (!TextUtils.isEmpty(A.building) && !TextUtils.isEmpty(A.floor) &&
-//                            TextUtils.isEmpty(B.building) && TextUtils.isEmpty(B.floor)) {
-//                        // 从室内->电梯->出入口->室外
-//                        WayPoint node = null, node2 = null;
-//                        if (A.floor != "F1") {
-//                            WayPoint pass = findNearByLift(A, A.building);
-//                            if (pass != null)
-//                                section.add(pass);
-//                            newNodes.add(section);
-//
-//                            section = new ArrayList<>();
-//                            if (pass != null) {
-//                                pass = new WayPoint(pass.point.x, pass.point.y, pass.building, "F1", pass.catalog);
-//                                section.add(pass);
-//                                node = findNearByInout(pass, pass.building);
-//                            }
-//                        } else
-//                            node = findNearByInout(A, A.building);
-//
-//                        if (node != null) {
-//                            node2 = new WayPoint(node.point.x, node.point.y, node.building, "", node.catalog);
-//                            section.add(node);
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (node2 != null)
-//                            section.add(node2);
-//                    } else if (!TextUtils.isEmpty(A.building) && !TextUtils.isEmpty(A.floor) &&
-//                                !TextUtils.isEmpty(B.building) && !TextUtils.isEmpty(B.floor) &&
-//                                !A.building.equalsIgnoreCase(B.building)) {
-//                        // 从室内->电梯->出入口A->出入口B->电梯->室内
-//                        WayPoint nodeA = null, nodeA2 = null;
-//                        if (A.floor != "F1") {
-//                            WayPoint pass = findNearByLift(A, A.building);
-//                            if (pass != null)
-//                                section.add(pass);
-//                            newNodes.add(section);
-//
-//                            section = new ArrayList<>();
-//                            if (pass != null) {
-//                                pass = new WayPoint(pass.point.x, pass.point.y, pass.building, "F1", pass.catalog);
-//                                section.add(pass);
-//                                nodeA = findNearByInout(pass, pass.building);
-//                            }
-//                        } else
-//                            nodeA = findNearByInout(A, A.building);
-//                        if (nodeA != null) {
-//                            nodeA2 = new WayPoint(nodeA.point.x, nodeA.point.y, nodeA.building, "", nodeA.catalog);
-//                            section.add(nodeA);
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        WayPoint nodeB = null, nodeB2 = null;
-//                        if (nodeA2 != null) {
-//                            section.add(nodeA2);
-//                            nodeB = findNearByInout(nodeA2, B.building);
-//                            if (nodeB != null) {
-//                                nodeB2 = new WayPoint(nodeB.point.x, nodeB.point.y, nodeB.building, "F1", nodeB.catalog);
-//                                section.add(nodeB);
-//                            }
-//                        }
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (nodeB2 != null)
-//                            section.add(nodeB2);
-//                        if (B.floor != "F1") {
-//                            WayPoint pass = null;
-//                            if (nodeB2 != null) {
-//                                pass = findNearByLift(nodeB2, nodeB2.building);
-//                                if (pass != null)
-//                                    section.add(pass);
-//                            }
-//                            newNodes.add(section);
-//
-//                            section = new ArrayList<>();
-//                            if (pass != null) {
-//                                pass = new WayPoint(pass.point.x, pass.point.y, pass.building, B.floor, pass.catalog);
-//                                if (pass != null)
-//                                    section.add(pass);
-//                            }
-//                        }
-//                    } else if (!TextUtils.isEmpty(A.building) && !TextUtils.isEmpty(A.floor) &&
-//                            !TextUtils.isEmpty(B.building) && !TextUtils.isEmpty(B.floor) &&
-//                            A.building.equalsIgnoreCase(B.building) && !A.floor.equalsIgnoreCase(B.floor)) {
-//                        // 从室内->电梯->室内
-//                        WayPoint pass = findNearByLift(A, A.building);
-//                        if (pass != null)
-//                            section.add(pass);
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (pass != null) {
-//                            pass = new WayPoint(pass.point.x, pass.point.y, pass.building, B.floor, pass.catalog);
-//                            if (pass != null)
-//                                section.add(pass);
-//                        }
-//                    } else if (!TextUtils.isEmpty(A.building) && !TextUtils.isEmpty(A.floor) &&
-//                            TextUtils.isEmpty(B.building) && !TextUtils.isEmpty(B.floor)) {
-//                        // 从室内->电梯->地下室
-//                        WayPoint pass = findNearByLift(A, A.building);
-//                        if (pass != null)
-//                            section.add(pass);
-//                        newNodes.add(section);
-//
-//                        section = new ArrayList<>();
-//                        if (pass != null) {
-//                            pass = new WayPoint(pass.point.x, pass.point.y, "", B.floor, pass.catalog);
-//                            if (pass != null)
-//                                section.add(pass);
-//                        }
-//                    }
-//                } catch (Exception ex) {
-//                    Log.e("insertStageInoutLift", ex.getMessage());
-//                }
-//                if (i == nodes.size()-2)
-//                    section.add(B);
-//            }
-//            newNodes.add(section);
-//
-//            return newNodes;
-//        }
-
         private WayPoint findNearByInout(WayPoint p, String building) {
             WayPoint result = null;
             double d = 0;
@@ -761,7 +512,6 @@ class NetWorkAnalystUtil {
 
         public MyFindPathEventListener() {
             super();
-            // TODO Auto-generated constructor stub
         }
 
         public FindPathResult getReult() {
@@ -770,7 +520,6 @@ class NetWorkAnalystUtil {
 
         @Override
         public void onFindPathStatusChanged(Object sourceObject, EventStatus status) {
-            Common.getLogger(null).log(Level.INFO, status.equals(EventStatus.PROCESS_COMPLETE) ? "FindPathService Success" : "FindPathService Failed");
             if (sourceObject instanceof FindPathResult && status.equals(EventStatus.PROCESS_COMPLETE)) {
                 pathResult = (FindPathResult) sourceObject;
             }

@@ -228,6 +228,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="清除轨迹" />
         <item
+            android:id="@+id/pathPlanData"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="获取路径规划数据" />
+        <item
             android:id="@+id/showHeatmap"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="显示热力图" />
@@ -296,6 +300,14 @@
             android:id="@+id/delRoute"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="注销路径规划事件" />
+        <item
+            android:id="@+id/addPathPlan"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="注册路径规划数据" />
+        <item
+            android:id="@+id/delPathPlan"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="注销路径规划数据" />
         <item
             android:id="@+id/startloc"
             android:icon="@drawable/ic_menu_slideshow"
