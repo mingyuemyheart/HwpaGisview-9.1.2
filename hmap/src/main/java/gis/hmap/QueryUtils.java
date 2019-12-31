@@ -19,7 +19,9 @@ import com.supermap.services.components.commontypes.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -562,7 +564,7 @@ import java.util.List;
             queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
-            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost()+Common.DATA_URL());
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
             try {
@@ -580,13 +582,18 @@ import java.util.List;
                 highlightStyle = new ArrayList<>();
                 normalGeometry = new ArrayList<>();
                 for (Feature feature : model.features) {
-                    Log.e("parkingId", feature.fieldValues[27]);
+                    Map<String, String> dataMap = new LinkedHashMap<>();
+                    for (int i = 0; i < feature.fieldNames.length; i++) {
+                        dataMap.put(feature.fieldNames[i], feature.fieldValues[i]);
+                    }
+                    String parkingId = dataMap.get("PID");
+                    Log.e("parkingId", parkingId);
                     boolean isHighLight = false;
                     int index = 0;
                     if (modIds != null)
                     for (String[] ids : modIds) {
                         for (String highlights : ids) {
-                            if (TextUtils.equals(feature.fieldValues[27], highlights)) {
+                            if (TextUtils.equals(parkingId, highlights)) {
                                 isHighLight = true;
                                 break;
                             }
@@ -839,8 +846,15 @@ import java.util.List;
         return result;
     }
 
+    /**
+     * 获取园区id
+     * @param lat
+     * @param lng
+     * @return
+     */
     public static String[] queryPark(double lat, double lng) {
         GetFeaturesBySQLParameters sqlParameters = new GetFeaturesBySQLParameters();
+        Log.e("queryPark", Common.globalParkId()+":"+Common.globalDataset());
         sqlParameters.datasetNames = new String[] { Common.globalParkId()+":"+Common.globalDataset() };
         sqlParameters.toIndex = 99999;
         QueryParameter queryParameter = new QueryParameter();

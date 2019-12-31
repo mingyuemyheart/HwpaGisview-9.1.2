@@ -1714,11 +1714,8 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             mapView.invalidate();
         } else {
             String realBuildingId = buildingId;
-            BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorid);
-            if (data != null) {
-                realBuildingId = data.targetId;
-                Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap convert to: buildingId=%s; floorid=%s", realBuildingId, floorid));
-            }
+
+            //转换之前需要完成的工作
             String newIndoorMap;
             if (TextUtils.isEmpty(realBuildingId))
                 newIndoorMap = "Basement:" + floorid;
@@ -1731,6 +1728,13 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             }
             clearOpensMap();
             currIndoorMap = newIndoorMap;
+            //转换之前需要完成的工作
+
+            BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorid);
+            if (data != null) {
+                realBuildingId = data.targetId;
+                Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap convert to: buildingId=%s; floorid=%s", realBuildingId, floorid));
+            }
 
             if (TextUtils.equals(indoorType, TYPE_PARKING)) {//室内停车场
 //                QueryUtils.BasementMapResult basementMapResult = GisDataCache.getBasement(floorid);

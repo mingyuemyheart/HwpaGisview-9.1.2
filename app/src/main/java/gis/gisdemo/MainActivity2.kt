@@ -396,6 +396,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.parking1 -> {
                 gisView.showIndoorMap(GisView.TYPE_PARKING, "J01", "B01", this)
                 gisView.showModelHighlight(Common.parkId(), "J01", "B01", arrayOf("A22","A21","C23","B55","车位"))
+//                gisView.showModelHighlight(Common.parkId(), "J01", "B01", arrayOf("001","002","088","050A","052A"))//天安云谷的点
             }
             R.id.parking2 -> {
                 gisView.showIndoorMap(GisView.TYPE_PARKING, "J5MB", "B01", this)
@@ -422,13 +423,21 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 ps.opacity = 120
                 ps.fillColor = Color.parseColor("#02D6F2")
                 ps.lineWidth = 20
+//                gisView.calcRoutePath(
+//                        RoutePoint(doubleArrayOf(22.655674, 114.05721),
+//                                Color.parseColor("#F20216"),
+//                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+//                        RoutePoint(doubleArrayOf(22.65592, 114.05719),
+//                                Color.parseColor("#F20216"),
+//                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+//                        ps)
                 gisView.calcRoutePath(
-                        RoutePoint(doubleArrayOf(22.655674, 114.05721),
+                        RoutePoint(doubleArrayOf(22.656435262118833, 114.05781090259555),
                                 Color.parseColor("#F20216"),
-                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
-                        RoutePoint(doubleArrayOf(22.65592, 114.05719),
+                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+                        RoutePoint(doubleArrayOf(22.657056542510674, 114.05674874782564),
                                 Color.parseColor("#F20216"),
-                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
                         ps)
             }
             R.id.clearRoute -> gisView.clearPath()
