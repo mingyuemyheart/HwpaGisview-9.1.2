@@ -431,13 +431,21 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
 //                                Color.parseColor("#F20216"),
 //                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
 //                        ps)
+//                gisView.calcRoutePath(
+//                        RoutePoint(doubleArrayOf(22.656435262118833, 114.05781090259555),
+//                                Color.parseColor("#F20216"),
+//                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+//                        RoutePoint(doubleArrayOf(22.657056542510674, 114.05674874782564),
+//                                Color.parseColor("#F20216"),
+//                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+//                        ps)
                 gisView.calcRoutePath(
-                        RoutePoint(doubleArrayOf(22.656435262118833, 114.05781090259555),
-                                Color.parseColor("#F20216"),
-                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
-                        RoutePoint(doubleArrayOf(22.657056542510674, 114.05674874782564),
-                                Color.parseColor("#F20216"),
-                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+                        RoutePoint(doubleArrayOf(22.655797, 114.058116),
+                                Color.parseColor("#FFFFFF"),
+                                "J01", "F02", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+                        RoutePoint(doubleArrayOf(22.656244, 114.057558),
+                                Color.parseColor("#FFFFFF"),
+                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
                         ps)
             }
             R.id.clearRoute -> gisView.clearPath()

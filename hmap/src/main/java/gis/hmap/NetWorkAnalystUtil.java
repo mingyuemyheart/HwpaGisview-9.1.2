@@ -143,8 +143,11 @@ class NetWorkAnalystUtil {
                         range = s.building+":"+s.floor;
                 }
                 List<Point2D> pts = new ArrayList<>();
-                for (WayPoint pt : waysec)
-                    pts.add(pt.point);
+                for (WayPoint pt : waysec) {
+                    if (pt != null && pt.point != null) {
+                        pts.add(pt.point);
+                    }
+                }
                 params.nodes = pts.toArray();
 
                 try {
