@@ -354,6 +354,8 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 roomStyle.lineWidth = 2
                 roomStyle.fillColor = Color.parseColor("#009090")
                 roomStyle.fillOpacity = 128
+                roomStyle.textColor = Color.WHITE
+                roomStyle.isShowText = true
                 gisView.setRoomStyle("J01", "F1", "1L45R", roomStyle)
             }
             R.id.delroomstyle -> gisView.setRoomStyle("J01", "F1", "1L45R", null)
