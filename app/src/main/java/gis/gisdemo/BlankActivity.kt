@@ -30,8 +30,8 @@ class BlankActivity : Activity() {
             startActivity(Intent(this@BlankActivity, MainActivity2::class.java))
         }
 
-        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
-//        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
+//        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
+        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
         GisView.setLocDecoder(true, object : IVASMappingListener {//获取IVAS数据
             override fun onIVASMappingSuccess(iVasMapping: MutableList<IVASMappingData>?) {
                 mUIHandler.post {

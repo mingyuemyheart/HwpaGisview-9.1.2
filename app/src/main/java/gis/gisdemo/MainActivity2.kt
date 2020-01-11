@@ -556,9 +556,14 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
      * 获取路径规划数据成功回调
      */
     override fun pathPlanDataSuccess(point2DS: MutableList<Point2D>?) {
+        var result = ""
         for (i in 0 until point2DS!!.size) {
             val point = point2DS[i]
+            result += String.format("%s---%s", point.x, point.y)+"\n"
             Log.e("pathPlanDataSuccess", String.format("%s---%s", point.x, point.y))
+        }
+        mUIHandler.post {
+            Toast.makeText(this@MainActivity2, result, Toast.LENGTH_LONG).show()
         }
     }
 
