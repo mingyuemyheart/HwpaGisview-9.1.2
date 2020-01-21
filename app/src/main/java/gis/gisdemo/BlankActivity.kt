@@ -13,6 +13,8 @@ import gis.hmap.GisView
 import gis.hmap.IVASMappingData
 import gis.hmap.IVASMappingListener
 import kotlinx.android.synthetic.main.activity_blank.*
+import kotlinx.android.synthetic.main.activity_blank.gisView
+import kotlinx.android.synthetic.main.activity_main.*
 
 class BlankActivity : Activity() {
 
@@ -30,9 +32,9 @@ class BlankActivity : Activity() {
             startActivity(Intent(this@BlankActivity, MainActivity2::class.java))
         }
 
-//        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
-        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
-        GisView.setLocDecoder(true, object : IVASMappingListener {//获取IVAS数据
+        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
+//        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
+        GisView.setLocDecoder(false, object : IVASMappingListener {//获取IVAS数据
             override fun onIVASMappingSuccess(iVasMapping: MutableList<IVASMappingData>?) {
                 mUIHandler.post {
                     for (i in 0 until iVasMapping!!.size) {
@@ -40,6 +42,11 @@ class BlankActivity : Activity() {
                     }
                     Toast.makeText(this@BlankActivity, "获取IVAS数据成功", Toast.LENGTH_SHORT).show()
                     btnIntent.visibility = View.VISIBLE
+
+                    if (iVasMapping.size > 0) {
+                        val externLocData = gisView.decodeLocLocation("f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
+                        Log.e("externLocData", externLocData.roomCode)
+                    }
                 }
             }
 
@@ -70,6 +77,7 @@ class BlankActivity : Activity() {
             GisView.enableAutoClearCache(true)
         }
 
+        gisView.setLogEnable(true)
         gisView.loadMap(5, doubleArrayOf(22.6573017046106460, 114.0576151013374200))
 //        gisView.addMapLoadedListener { Toast.makeText(this@BlankActivity, "地图加载完成", Toast.LENGTH_SHORT).show() }
 

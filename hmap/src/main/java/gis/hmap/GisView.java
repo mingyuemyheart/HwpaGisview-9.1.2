@@ -1128,26 +1128,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
-    private void loadOffLineMaps(int zoom, double[] center) {
-        setZoom(center, zoom);
-        if (mapLayer == null) {
-            mapLayer = new LayerView(getContext());
-            String url = Common.getHost() + Common.MAP_URL();
-            if (logEnable) {
-                Log.e(TAG+"loadOffLineMaps", url);
-            }
-            mapLayer.setURL(url);
-//        mapLayer.setExtParams(Common.extParam());
-//        darkLayer = new MBTilesLayerView(getContext(), name);
-//        backMapLayer = new LayerView(getContext());
-//        backMapLayer.setURL(Common.getHost() + Common.BACKMAP_URL());
-//        mapView.addLayer(backMapLayer);
-            mapView.addLayer(mapLayer);
-            handler.sendEmptyMessage(Common.START_TIMER);
-            QueryUtils.queryAllBuildings("buildings@" + Common.parkId(), handler);
-        }
-    }
-
     public static void enableAutoClearCache(boolean enable) {
         autoClearCachedTiles = enable;
     }
@@ -1233,6 +1213,26 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         Common.setCurrentZone(workspace, parkId);
         Common.setExtParam(extParam);
         loadOffLineMaps(zoom, center);
+    }
+
+    private void loadOffLineMaps(int zoom, double[] center) {
+        setZoom(center, zoom);
+        if (mapLayer == null) {
+            mapLayer = new LayerView(getContext());
+            String url = Common.getHost() + Common.MAP_URL();
+            if (logEnable) {
+                Log.e(TAG+"loadOffLineMaps", url);
+            }
+            mapLayer.setURL(url);
+//        mapLayer.setExtParams(Common.extParam());
+//        darkLayer = new MBTilesLayerView(getContext(), name);
+//        backMapLayer = new LayerView(getContext());
+//        backMapLayer.setURL(Common.getHost() + Common.BACKMAP_URL());
+//        mapView.addLayer(backMapLayer);
+            mapView.addLayer(mapLayer);
+            handler.sendEmptyMessage(Common.START_TIMER);
+            QueryUtils.queryAllBuildings("buildings@" + Common.parkId(), handler);
+        }
     }
 
     public void setGlobalZone(String workspace, String datasource, String dataset) {
@@ -2546,8 +2546,8 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     public ExternLocData decodeLocLocation(String id, int floor) {
         IVASMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getIVASBuilding(id);
         if (data != null && data.ivasFloorList != null && data.floorList != null) {
-            for (int i=0; i<data.ivasFloorList.length && i<data.floorList.length; i++) {
-                if (TextUtils.equals(data.ivasFloorList[i], floor+"")) {
+            for (int i = 0; i < data.ivasFloorList.length && i < data.floorList.length; i++) {
+                if (TextUtils.equals(data.ivasFloorList[i], floor + "")) {
                     return new ExternLocData(data.lat, data.lng, data.buildingId, data.floorList[i], data.roomCode, data.fields, data.values);
                 }
             }

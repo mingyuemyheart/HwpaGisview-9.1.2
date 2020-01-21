@@ -185,7 +185,8 @@ import java.util.Map;
             GetFeaturesResult floor = listener.getReult();
             if (floor != null && floor.features != null) {
                 rooms = new ArrayList<>();
-                for (Feature feature : floor.features) {
+                for (int m = 0; m < floor.features.length; m++) {
+                    Feature feature = floor.features[m];
                     for (int i = 0; i < feature.fieldValues.length; i++) {
                         Log.e("QueryIndoorMapRunnable", feature.fieldNames[i]+"---"+feature.fieldValues[i]);
                     }
