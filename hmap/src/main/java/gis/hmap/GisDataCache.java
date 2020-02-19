@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +48,7 @@ final class GisDataCache {
     private boolean hasError = false;
     private HashMap<String, Feature> buildingCache = new HashMap<>();
     private List<String> basementList = new Vector<>();
-    private static List<IVASMappingData> iVasMapping = new ArrayList<>();
+    private static Map<String, IVASMappingData> iVasMapping = new HashMap<>();//key=ivasBuildingId
     private List<BuildingConvertMappingData> buildingMapping = new ArrayList<>();
 
     private GisDataCache(Context context, MapCacheListener listener) {
@@ -71,34 +72,39 @@ final class GisDataCache {
         }
     }
 
+    /**
+     * 获取ivas数据
+     * @param test
+     * @param callback
+     */
     public static void initIVASMapping(final boolean test, final IVASMappingListener callback) {
-        final boolean useTest = test;
         Common.fixedThreadPool.execute(() -> {
             Feature[] features = QueryUtils.queryDatasetAll("IVAS", true);
             if (features != null) {
                 for (Feature feature : features) {
-                    IVASMappingData data = new IVASMappingData(feature, useTest);
-                    iVasMapping.add(data);
+                    IVASMappingData data = new IVASMappingData(feature, test);
+                    iVasMapping.put(data.ivasBuildingId, data);
                 }
             }
             if (callback != null) {
                 if (iVasMapping.size() > 0) {
                     callback.onIVASMappingSuccess(iVasMapping);
                 } else {
-                    callback.onIVASMappingFailed("暂无查询数据");
+                    callback.onIVASMappingFailed("获取IVAS数据失败");
                 }
             }
         });
     }
 
+    /**
+     * 获取ivas数据对应id数据
+     * @param id
+     * @return
+     */
     public IVASMappingData getIVASBuilding(String id) {
-        for (IVASMappingData data : iVasMapping) {
-            if (TextUtils.isEmpty(data.ivasBuildingId))
-                continue;
-            if (data.ivasBuildingId.equalsIgnoreCase(id))
-                return data;
+        if (iVasMapping.containsKey(id)) {
+            return iVasMapping.get(id);
         }
-
         return null;
     }
 

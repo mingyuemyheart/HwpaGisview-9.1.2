@@ -74,6 +74,12 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
         initToolbar()
         initMap()
         initLocation()
+
+        val externLocData = GisView.decodeLocLocation(this@MainActivity2, "f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
+        for (i in externLocData.values.indices) {
+            Log.e("values", externLocData.fields[i]+"---"+externLocData.values[i])
+        }
+        Log.e("externLocData", externLocData.lat.toString()+","+externLocData.lng.toString()+","+externLocData.buildingId+","+externLocData.floorId+","+externLocData.roomCode)
     }
 
     private fun initToolbar() {

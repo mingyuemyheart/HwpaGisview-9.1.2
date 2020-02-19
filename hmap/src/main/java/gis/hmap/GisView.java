@@ -116,7 +116,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     protected CalculateRouteListener mCalculateRouteListener;//路径规划绘制
     protected PathPlanDataListener pathPlanDataListener;//获取路径规划数据
     protected static boolean autoClearCachedTiles = false;
-    protected MapCacheListener mMapCacheListener;
+    protected static MapCacheListener mMapCacheListener;
     protected MapLoadedListener mMapLoadedListener;
     protected List<MapMoveListener> mMapMoveListener;
     protected boolean isMapLoaded = false;
@@ -2539,12 +2539,13 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 
     /**
      * 查询对应楼层ivas数据集
+     * @param context
      * @param id
      * @param floor
      * @return
      */
-    public ExternLocData decodeLocLocation(String id, int floor) {
-        IVASMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getIVASBuilding(id);
+    public static ExternLocData decodeLocLocation(Context context, String id, int floor) {
+        IVASMappingData data = GisDataCache.getInstance(context, mMapCacheListener).getIVASBuilding(id);
         if (data != null && data.ivasFloorList != null && data.floorList != null) {
             for (int i = 0; i < data.ivasFloorList.length && i < data.floorList.length; i++) {
                 if (TextUtils.equals(data.ivasFloorList[i], floor + "")) {

@@ -13,8 +13,6 @@ import gis.hmap.GisView
 import gis.hmap.IVASMappingData
 import gis.hmap.IVASMappingListener
 import kotlinx.android.synthetic.main.activity_blank.*
-import kotlinx.android.synthetic.main.activity_blank.gisView
-import kotlinx.android.synthetic.main.activity_main.*
 
 class BlankActivity : Activity() {
 
@@ -34,25 +32,27 @@ class BlankActivity : Activity() {
 
         GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
 //        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
-        GisView.setLocDecoder(false, object : IVASMappingListener {//获取IVAS数据
-            override fun onIVASMappingSuccess(iVasMapping: MutableList<IVASMappingData>?) {
+        GisView.setLocDecoder(false, object : IVASMappingListener {
+            override fun onIVASMappingSuccess(iVasMapping: MutableMap<String, IVASMappingData>?) {
                 mUIHandler.post {
-                    for (i in 0 until iVasMapping!!.size) {
-                        Log.e("onIVASMappingSuccess$i", iVasMapping[i].ivasBuildingId)
-                    }
-                    Toast.makeText(this@BlankActivity, "获取IVAS数据成功", Toast.LENGTH_SHORT).show()
-                    btnIntent.visibility = View.VISIBLE
+                    if (iVasMapping != null) {
+                        for ((key, value) in iVasMapping) {
+                            Log.e("onIVASMappingSuccess", key)
+                        }
+                        Toast.makeText(this@BlankActivity, "获取IVAS数据成功", Toast.LENGTH_SHORT).show()
+                        btnIntent.visibility = View.VISIBLE
 
-                    if (iVasMapping.size > 0) {
-                        val externLocData = gisView.decodeLocLocation("f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
-                        Log.e("externLocData", externLocData.roomCode)
+                        val externLocData = GisView.decodeLocLocation(this@BlankActivity, "f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
+                        for (i in externLocData.values.indices) {
+                            Log.e("values", externLocData.fields[i]+"---"+externLocData.values[i])
+                        }
+                        Log.e("externLocData", externLocData.lat.toString()+","+externLocData.lng.toString()+","+externLocData.buildingId+","+externLocData.floorId+","+externLocData.roomCode)
                     }
                 }
             }
 
             override fun onIVASMappingFailed(msg: String?) {
                 mUIHandler.post {
-                    Log.e("onIVASMappingFailed", msg)
                     Toast.makeText(this@BlankActivity, msg, Toast.LENGTH_SHORT).show()
                 }
             }

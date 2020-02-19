@@ -1,11 +1,11 @@
 package gis.hmap;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 获取ivas数据回调
  */
 public interface IVASMappingListener {
-    void onIVASMappingSuccess(List<IVASMappingData> iVasMapping);
+    void onIVASMappingSuccess(Map<String, IVASMappingData> iVasMapping);
     void onIVASMappingFailed(String msg);
 }
