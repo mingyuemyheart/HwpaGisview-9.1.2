@@ -4,9 +4,9 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.view.View;
 
-import com.supermap.android.maps.MapView;
-import com.supermap.android.maps.Overlay;
-import com.supermap.android.maps.Point2D;
+import com.supermap.imobilelite.maps.MapView;
+import com.supermap.imobilelite.maps.Overlay;
+import com.supermap.imobilelite.maps.Point2D;
 
 /**
  * Created by Ryan on 2018/10/18.

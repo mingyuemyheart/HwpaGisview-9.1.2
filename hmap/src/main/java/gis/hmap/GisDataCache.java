@@ -2,12 +2,10 @@ package gis.hmap;
 
 
 import android.content.Context;
-import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.supermap.android.data.GetFeaturesResult;
-import com.supermap.android.maps.Point2D;
+import com.supermap.imobilelite.maps.Point2D;
 import com.supermap.services.components.commontypes.Feature;
 import com.supermap.services.components.commontypes.Geometry;
 import com.supermap.services.components.commontypes.Rectangle2D;
@@ -16,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -29,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

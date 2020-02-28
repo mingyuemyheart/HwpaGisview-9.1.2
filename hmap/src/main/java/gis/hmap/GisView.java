@@ -13,6 +13,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -27,17 +28,18 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
-import com.supermap.android.maps.AbstractTileLayerView;
-import com.supermap.android.maps.BoundingBox;
-import com.supermap.android.maps.DefaultItemizedOverlay;
-import com.supermap.android.maps.DrawableOverlay;
-import com.supermap.android.maps.LayerView;
-import com.supermap.android.maps.LineOverlay;
-import com.supermap.android.maps.MapController;
-import com.supermap.android.maps.MapView;
-import com.supermap.android.maps.Overlay;
-import com.supermap.android.maps.Point2D;
-import com.supermap.android.maps.PolygonOverlay;
+import com.supermap.imobilelite.maps.AbstractTileLayerView;
+import com.supermap.imobilelite.maps.BoundingBox;
+import com.supermap.imobilelite.maps.DefaultItemizedOverlay;
+import com.supermap.imobilelite.maps.DrawableOverlay;
+import com.supermap.imobilelite.maps.LayerView;
+import com.supermap.imobilelite.maps.LineOverlay;
+import com.supermap.imobilelite.maps.MapController;
+import com.supermap.imobilelite.maps.MapView;
+import com.supermap.imobilelite.maps.Overlay;
+import com.supermap.imobilelite.maps.Point2D;
+import com.supermap.imobilelite.maps.PolygonOverlay;
+import com.supermap.imobilelite.maps.RMGLCanvas;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -73,6 +75,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 
     private int indoorZIndex = -10;//室内地图
     private int parkingZIndex = -9;//室内停车场
+    private Handler mUIHandler = new Handler();
 
     private static final String calculatdRouteKey = "[calculatdRoute]";
     private static final String indoorKeyTemplate = "indoor[building:%s]";
@@ -84,7 +87,8 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 
     private GisView _instance = null;
     private MapView mapView;
-    protected AbstractTileLayerView mapLayer = null;
+    protected LayerView outdoorLayer = null;//室外
+    protected LayerView indoorLayer = null;//室内
     protected Map<String, List<Overlay>> namedOverlays;
     protected List<LineOverlay> routeOverlay;
     protected List<MarkerListener> mMarkerListener;
@@ -107,7 +111,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     protected String currIndoorMap = "";
     protected HashMap<String, GeneralMarker> defaultFacilities;
     protected boolean isShowHighLight = false;
-    protected int maxZoomLevel = 5;
+    protected int maxZoomLevel = 18;
     protected static HashMap<String, String> floorMapper;
     protected int lastZoomLevel = -1;
     protected int indoorZoomLevel = 0;//室内地图默认缩放值
@@ -1176,17 +1180,27 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @return
      */
     public boolean loadMap(int zoom, double[] center) {
-        String[] location = QueryUtils.queryPark(center[0], center[1]);
-        if (location != null) {
-            if (!location[0].equalsIgnoreCase(Common.parkId())) {
-                if (autoClearCachedTiles) {
-                    clearMapCache();
+        queryWorkspace(center[1], center[0], loc -> mUIHandler.post(() -> {
+            if (loc != null && loc.length > 0) {
+                GeoLocation geoLocation = loc[0];
+                if (!TextUtils.isEmpty(geoLocation.address)) {
+                    String[] addr = geoLocation.address.split(",");
+                    if (logEnable) {
+                        Log.e("loadMap", geoLocation.address);
+                    }
+                    if (addr.length > 0) {
+                        if (!addr[0].equalsIgnoreCase(Common.parkId())) {
+                            if (autoClearCachedTiles) {
+                                clearMapCache();
+                            }
+                            destroyMap();
+                        }
+                        loadMap(zoom, center, addr[0], addr[0]);
+                    }
                 }
-                destroyMap();
             }
-            loadMap(zoom, center, location[0], location[0]);
-            return true;
-        }
+        }));
+//        loadMap(zoom, center, "BTYQ", "BTYQ");
         return false;
     }
 
@@ -1212,26 +1226,48 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     public void loadMap(int zoom, double[] center, String workspace, String parkId, List<String> extParam) {
         Common.setCurrentZone(workspace, parkId);
         Common.setExtParam(extParam);
-        loadOffLineMaps(zoom, center);
+        setZoom(center, zoom);
+        drawOutdoorLayer();
     }
 
-    private void loadOffLineMaps(int zoom, double[] center) {
-        setZoom(center, zoom);
-        if (mapLayer == null) {
-            mapLayer = new LayerView(getContext());
-            String url = Common.getHost() + Common.MAP_URL();
+    /**
+     * 绘制室外专题图层
+     */
+    private void drawOutdoorLayer() {
+        //栅格瓦片
+        if (outdoorLayer == null) {
+            outdoorLayer = new LayerView(getContext());
+            String outdoorUrl = Common.getHost() + Common.MAP_URL();
             if (logEnable) {
-                Log.e(TAG+"loadOffLineMaps", url);
+                Log.e("outdoorUrl", outdoorUrl);
             }
-            mapLayer.setURL(url);
-//        mapLayer.setExtParams(Common.extParam());
-//        darkLayer = new MBTilesLayerView(getContext(), name);
-//        backMapLayer = new LayerView(getContext());
-//        backMapLayer.setURL(Common.getHost() + Common.BACKMAP_URL());
-//        mapView.addLayer(backMapLayer);
-            mapView.addLayer(mapLayer);
+            outdoorLayer.setURL(outdoorUrl);
+            mapView.addLayer(outdoorLayer);
+
             handler.sendEmptyMessage(Common.START_TIMER);
             QueryUtils.queryAllBuildings("buildings@" + Common.parkId(), handler);
+        }
+
+//        //mvt矢量瓦片
+//        System.loadLibrary("lite");
+//        String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Supermap/Webcache/";
+//        RMGLCanvas rmglCanvas = new RMGLCanvas(getContext());
+//        rmglCanvas.CheckFile(getContext());
+//        rmglCanvas.openOnlineMVTServer("http://192.168.1.249:8090/iserver/services/map-ugcv5-B1_B01/rest/maps/B1_B01",sdcard+"/SuperMap/WebCache/");
+//        rmglCanvas.setScale(0.000457142857);
+//        rmglCanvas.setCenter(new com.supermap.imobilelite.data.Point2D(120.79,31.27));
+//        mapView.addGLLayer(rmglCanvas);
+//        mapView.refresh();
+    }
+
+    /**
+     * 清除室外地图专题图层
+     */
+    private void removeOutdoorLayer() {
+        if (outdoorLayer != null) {
+            mapView.removeLayer(outdoorLayer);
+            outdoorLayer.destroy();
+            outdoorLayer = null;
         }
     }
 
@@ -1365,10 +1401,8 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         clearOpensMap();
         mapView.removeAllLayers();
         mapView.getOverlays().add(touchOverlay);
-        if (mapLayer != null) {
-            mapLayer.destroy();
-            mapLayer = null;
-        }
+        removeOutdoorLayer();
+        removeIndoorLayer();
         if (buildings != null) {
             buildings.clear();
             buildings = null;
@@ -1707,6 +1741,9 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @param floorid
      */
     public void showIndoorMap(String indoorType, String buildingId, String floorid, IndoorCallback callback) {
+        removeIndoorLayer();
+        drawIndoorLayer(buildingId, floorid);
+
         indoorCallback = callback;
         Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap: buildingId=%s; floorid=%s", buildingId, floorid));
         if (TextUtils.isEmpty(floorid)) {
@@ -1812,6 +1849,32 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //                } else
                     QueryUtils.queryIndoorMap(Common.parkId() + ":Buildings", realBuildingId, floorid, handler);
             }
+        }
+    }
+
+    /**
+     * 绘制室内专题图层
+     */
+    private void drawIndoorLayer(String buildingId, String floorid) {
+        if (indoorLayer == null) {
+            indoorLayer = new LayerView(getContext());
+            String indoorUrl = String.format("%s/map-ugcv5-%s_%s_%s/rest/maps/%s_%s_%s", Common.getHost(), Common.parkId(), buildingId, floorid, Common.parkId(), buildingId, floorid);
+            if (logEnable) {
+                Log.e("indoorUrl", indoorUrl);
+            }
+            indoorLayer.setURL(indoorUrl);
+            mapView.addLayer(indoorLayer);
+        }
+    }
+
+    /**
+     * 清除室内专题图层
+     */
+    public void removeIndoorLayer() {
+        if (indoorLayer != null) {
+            mapView.removeLayer(indoorLayer);
+            indoorLayer.destroy();
+            indoorLayer = null;
         }
     }
 
@@ -2583,14 +2646,14 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                     String indoorKey = String.format(indoorKeyTemplate, indoor.buildingId);
                     if (!host.openIndoors.containsKey(indoorKey))
                         host.openIndoors.put(indoorKey, indoor);
-                    host.renderIndoorMap(indoor);
+//                    host.renderIndoorMap(indoor);
                     break;
                 case Common.QUERY_BASEMENT_MAP:
                     QueryUtils.BasementMapResult basement = (QueryUtils.BasementMapResult) msg.obj;
                     String basementKey = String.format(basementKeyTemplate, basement.floorId);
                     if (!host.openBasements.containsKey(basementKey))
                         host.openBasements.put(basementKey, basement);
-                    host.renderBasementMap(basement);
+//                    host.renderBasementMap(basement);
                     break;
                 case Common.QUERY_PERIMETER:
                     QueryUtils.PerimeterResult perimeter = (QueryUtils.PerimeterResult) msg.obj;
@@ -2738,7 +2801,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             if (leftTop == null || rightBottom == null)
                 return;
             r = (double) dw / (rightBottom.x - leftTop.x);
-//            Log.i("--indoor", String.format("%d, %d; base: %f, %f", dw, dh, leftTop.x, leftTop.y));
             if (dw > 10 && dh > 10)
                 baseBmp = Bitmap.createBitmap((int) dw, (int) dh, Bitmap.Config.ARGB_8888);
             if (baseBmp != null) {

@@ -1,6 +1,6 @@
 package gis.hmap;
 
-import com.supermap.android.maps.Point2D;
+import com.supermap.imobilelite.maps.Point2D;
 import com.supermap.services.components.commontypes.Rectangle2D;
 
 import java.util.List;

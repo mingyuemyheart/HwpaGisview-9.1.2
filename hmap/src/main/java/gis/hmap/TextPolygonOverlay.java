@@ -7,9 +7,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.text.TextPaint;
 
-import com.supermap.android.maps.MapView;
-import com.supermap.android.maps.Point2D;
-import com.supermap.android.maps.PolygonOverlay;
+import com.supermap.imobilelite.maps.MapView;
+import com.supermap.imobilelite.maps.Point2D;
+import com.supermap.imobilelite.maps.PolygonOverlay;
 
 /**
  * 文本overlay

@@ -5,16 +5,16 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.supermap.android.commons.EventStatus;
-import com.supermap.android.data.GetFeaturesByGeometryService;
-import com.supermap.android.data.GetFeaturesBySQLParameters;
-import com.supermap.android.data.GetFeaturesBySQLService;
-import com.supermap.android.data.GetFeaturesResult;
-import com.supermap.android.maps.Point2D;
+import com.supermap.services.components.commontypes.Rectangle2D;
+import com.supermap.imobilelite.commons.EventStatus;
+import com.supermap.imobilelite.data.GetFeaturesByGeometryService;
+import com.supermap.imobilelite.data.GetFeaturesBySQLParameters;
+import com.supermap.imobilelite.data.GetFeaturesBySQLService;
+import com.supermap.imobilelite.data.GetFeaturesResult;
+import com.supermap.imobilelite.maps.Point2D;
 import com.supermap.services.components.commontypes.Feature;
 import com.supermap.services.components.commontypes.Geometry;
 import com.supermap.services.components.commontypes.QueryParameter;
-import com.supermap.services.components.commontypes.Rectangle2D;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -316,7 +316,6 @@ import java.util.Map;
             queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
-            Log.e("QueryBasementMap", Common.getHost() + Common.DATA_URL());
             GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);

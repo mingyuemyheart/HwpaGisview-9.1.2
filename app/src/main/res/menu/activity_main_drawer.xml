@@ -167,6 +167,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="J01 F04" />
         <item
+            android:id="@+id/removeLayer"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="清除图层" />
+        <item
             android:id="@+id/roomstyle"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="房间样式J01 F01" />

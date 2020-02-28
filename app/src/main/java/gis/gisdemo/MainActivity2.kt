@@ -22,7 +22,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.Toast
-import com.supermap.android.maps.Point2D
+import com.supermap.imobilelite.maps.Point2D
 import gis.hmap.*
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -74,12 +74,6 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
         initToolbar()
         initMap()
         initLocation()
-
-        val externLocData = GisView.decodeLocLocation(this@MainActivity2, "f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
-        for (i in externLocData.values.indices) {
-            Log.e("values", externLocData.fields[i]+"---"+externLocData.values[i])
-        }
-        Log.e("externLocData", externLocData.lat.toString()+","+externLocData.lng.toString()+","+externLocData.buildingId+","+externLocData.floorId+","+externLocData.roomCode)
     }
 
     private fun initToolbar() {
@@ -92,7 +86,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
     private fun initMap() {
         gisView.setLogEnable(true)
         gisView.setMaxZoomLevel(18)
-        gisView.loadMap(5, doubleArrayOf(22.6573017046106460, 114.0576151013374200))
+        gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
         gisView.setRouteFacility(
                 arrayOf("Lift", "InOut"),
                 arrayOf(GeneralMarker(null, null, resources.getDrawable(R.drawable.elevator, null), 32, 32, null),
@@ -116,9 +110,9 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
 
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
         when(p0.itemId) {
-            R.id.loadMap -> gisView.loadMap(5, doubleArrayOf(22.6573017046106460, 114.0576151013374200))
+            R.id.loadMap -> gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
             R.id.setCenter -> {
-                gisView.setCenter(22.6573017046106460, 114.0576151013374200)
+                gisView.setCenter(22.656049, 114.057771)
                 Toast.makeText(this, String.format("中心：%f, %f", gisView.center[0], gisView.center[1]), Toast.LENGTH_SHORT).show()
             }
             R.id.getCenter -> {
@@ -274,7 +268,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                         Color.RED, "none", "none", 8, 120)
                 gisView.drawCustomPath(routePoints)
             }
-            R.id.encodeAddress -> gisView.getAddressOfLocation(114.0576151013374200, 22.6573017046106460, this)
+            R.id.encodeAddress -> gisView.getAddressOfLocation(114.055225, 22.653405, this)
             R.id.decodeAddress -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("搜索地址")
@@ -353,6 +347,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.loadF2 -> gisView.showIndoorMap("J01", "F02", this)
             R.id.loadF3 -> gisView.showIndoorMap("J01", "F03", this)
             R.id.loadF4 -> gisView.showIndoorMap("J01", "F04", this)
+            R.id.removeLayer -> gisView.removeIndoorLayer()
             R.id.roomstyle -> {
                 val roomStyle = RoomStyle()
                 roomStyle.lineColor = Color.parseColor("#909000")
@@ -362,9 +357,9 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 roomStyle.fillOpacity = 128
                 roomStyle.textColor = Color.WHITE
                 roomStyle.isShowText = true
-                gisView.setRoomStyle("J01", "F1", "1L45R", roomStyle)
+                gisView.setRoomStyle("J01", "F01", "1L45R", roomStyle)
             }
-            R.id.delroomstyle -> gisView.setRoomStyle("J01", "F1", "1L45R", null)
+            R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L45R", null)
             R.id.typestyle -> {
                 val roomStyle = RoomStyle()
                 roomStyle.lineColor = Color.parseColor("#ff0000")

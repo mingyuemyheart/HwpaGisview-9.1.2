@@ -5,19 +5,17 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.supermap.android.commons.EventStatus;
-import com.supermap.android.maps.BoundingBox;
-import com.supermap.android.maps.MapView;
-import com.supermap.android.maps.Point2D;
-import com.supermap.android.networkAnalyst.FindPathParameters;
-import com.supermap.android.networkAnalyst.FindPathResult;
-import com.supermap.android.networkAnalyst.FindPathService;
-import com.supermap.android.networkAnalyst.TransportationAnalystParameter;
-import com.supermap.android.networkAnalyst.TransportationAnalystResultSetting;
+import com.supermap.imobilelite.commons.EventStatus;
+import com.supermap.imobilelite.maps.BoundingBox;
+import com.supermap.imobilelite.maps.MapView;
+import com.supermap.imobilelite.maps.Point2D;
+import com.supermap.imobilelite.networkAnalyst.FindPathParameters;
+import com.supermap.imobilelite.networkAnalyst.FindPathResult;
+import com.supermap.imobilelite.networkAnalyst.FindPathService;
+import com.supermap.imobilelite.networkAnalyst.TransportationAnalystParameter;
+import com.supermap.imobilelite.networkAnalyst.TransportationAnalystResultSetting;
 import com.supermap.services.components.commontypes.Path;
-import com.supermap.services.components.commontypes.Route;
 
-import java.sql.DataTruncation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -151,6 +149,7 @@ class NetWorkAnalystUtil {
                 params.nodes = pts.toArray();
 
                 try {
+                    Log.e("routePath", Common.getHost() + Common.TRANSPORT_URL(waysec.get(0).floor));
                     FindPathService path = new FindPathService(Common.getHost() + Common.TRANSPORT_URL(waysec.get(0).floor));
                     MyFindPathEventListener listener = new MyFindPathEventListener();
                     path.process(params, listener);

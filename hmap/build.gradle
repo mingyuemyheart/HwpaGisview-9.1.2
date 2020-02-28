@@ -10,6 +10,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
     }
 
     buildTypes {
@@ -39,6 +43,30 @@ repositories {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
-    api files('libs/iclient_android_9.0.1.jar')
     api files('libs/AMap_Location_V4.8.0_20191210.jar')
+    api files('libs/com.supermap.imobilelite_v912.jar')
+    api files('libs/httpclient-4.0.1.jar')
+    api files('libs/httpcore-4.0.1.jar')
+    api files('libs/lite-commontypes.jar')
+    api files('libs/lite-commons-utils.jar')
+    api files('libs/cal10n-api-0.7.7.jar')
+    api files('libs/slf4j-api-1.6.6.jar')
+    api files('libs/slf4j-ext-1.6.6.jar')
+    api files('libs/slf4j-simple-1.6.6.jar')
+    api files('libs/org.restlet-2.2.3.jar')
+    api files('libs/org.restlet.ext.json-2.2.3.jar')
+    api files('libs/commons-lang3-3.4.jar')
+    api files('libs/fastjson-1.2.8.jar')
+    api files('libs/commons-codec-1.10.jar')
+    api files('libs/commons-io-2.5.jar')
+    api files('libs/commons-lang-2.6.jar')
+    api files('libs/commons-logging-1.2.jar')
+    api files('libs/jsr311-api-1.1.1.jar')
+    api files('libs/lite-commons-mapping-cache.jar')
+    api files('libs/lite-commons-utils-rest.jar')
+    api files('libs/lite-commontypes-rest.jar')
+    api files('libs/lite-components.jar')
+    api files('libs/lite-components-context.jar')
+    api files('libs/lite-components-spi.jar')
+    api files('libs/lite-providers-rest.jar')
 }

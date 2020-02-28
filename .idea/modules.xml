@@ -3,14 +3,14 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/HwpaGisview.iml" filepath="$PROJECT_DIR$/HwpaGisview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/HwpaGisview-9.1.2.iml" filepath="$PROJECT_DIR$/HwpaGisview-9.1.2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/HwpaGisview-9.1.2-app.iml" filepath="$PROJECT_DIR$/app/HwpaGisview-9.1.2-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hmap/HwpaGisview-9.1.2-hmap.iml" filepath="$PROJECT_DIR$/hmap/HwpaGisview-9.1.2-hmap.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/HwpaGisview-app.iml" filepath="$PROJECT_DIR$/app/HwpaGisview-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/hmap/HwpaGisview-hmap.iml" filepath="$PROJECT_DIR$/hmap/HwpaGisview-hmap.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/gisview-src-noivas-1119-2.iml" filepath="$PROJECT_DIR$/gisview-src-noivas-1119-2.iml" />
       <module fileurl="file://$PROJECT_DIR$/hmap/hmap.iml" filepath="$PROJECT_DIR$/hmap/hmap.iml" />
-      <module fileurl="file://$PROJECT_DIR$/伟岸纵横-HwpaGisview.iml" filepath="$PROJECT_DIR$/伟岸纵横-HwpaGisview.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/伟岸纵横-HwpaGisview-app.iml" filepath="$PROJECT_DIR$/app/伟岸纵横-HwpaGisview-app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/hmap/伟岸纵横-HwpaGisview-hmap.iml" filepath="$PROJECT_DIR$/hmap/伟岸纵横-HwpaGisview-hmap.iml" />
     </modules>
   </component>
 </project>

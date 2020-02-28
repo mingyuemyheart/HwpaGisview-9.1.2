@@ -203,7 +203,7 @@ public class Common {
     private static final String MBTILES_ROOT = "/MBTiles/";
     private static final String MBTILES_ROOT_LOCAL = "/supermap/mbtiles";
     // SuperMap iServer提供的地图采用固定地址传递
-    private static final String MAIN_MAP = "/map-{workSpace}/rest/maps/{parkId}";
+    private static final String MAIN_MAP = "/map-ugcv5-{workSpace}/rest/maps/{parkId}";
     public static String MAP_URL() {
         if (_instance == null)
             return "";
@@ -220,7 +220,7 @@ public class Common {
             return url;
         }
     }
-    private static final String BACK_MAP = "/map-{workSpace}/rest/maps/common";
+    private static final String BACK_MAP = "/map-ugcv5-{workSpace}/rest/maps/common";
     public static String BACKMAP_URL() {
         if (_instance == null)
             return "";

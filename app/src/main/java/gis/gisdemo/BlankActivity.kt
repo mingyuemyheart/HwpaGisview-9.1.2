@@ -25,41 +25,42 @@ class BlankActivity : Activity() {
     }
 
     private fun initMap() {
-        btnIntent.visibility = View.GONE
+//        btnIntent.visibility = View.GONE
         btnIntent.setOnClickListener {
             startActivity(Intent(this@BlankActivity, MainActivity2::class.java))
         }
 
-        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
+//        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
 //        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
-        GisView.setLocDecoder(false, object : IVASMappingListener {
-            override fun onIVASMappingSuccess(iVasMapping: MutableMap<String, IVASMappingData>?) {
-                mUIHandler.post {
-                    if (iVasMapping != null) {
-                        for ((key, value) in iVasMapping) {
-                            Log.e("onIVASMappingSuccess", key)
-                        }
-                        Toast.makeText(this@BlankActivity, "获取IVAS数据成功", Toast.LENGTH_SHORT).show()
-                        btnIntent.visibility = View.VISIBLE
-
-                        val externLocData = GisView.decodeLocLocation(this@BlankActivity, "f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
-                        for (i in externLocData.values.indices) {
-                            Log.e("values", externLocData.fields[i]+"---"+externLocData.values[i])
-                        }
-                        Log.e("externLocData", externLocData.lat.toString()+","+externLocData.lng.toString()+","+externLocData.buildingId+","+externLocData.floorId+","+externLocData.roomCode)
-                    }
-                }
-            }
-
-            override fun onIVASMappingFailed(msg: String?) {
-                mUIHandler.post {
-                    Toast.makeText(this@BlankActivity, msg, Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
+        GisView.setGisServer("http://192.168.1.249:8090/iserver/services")
+//        GisView.setLocDecoder(false, object : IVASMappingListener {
+//            override fun onIVASMappingSuccess(iVasMapping: MutableMap<String, IVASMappingData>?) {
+//                mUIHandler.post {
+//                    if (iVasMapping != null) {
+//                        for ((key, value) in iVasMapping) {
+//                            Log.e("onIVASMappingSuccess", key)
+//                        }
+//                        Toast.makeText(this@BlankActivity, "获取IVAS数据成功", Toast.LENGTH_SHORT).show()
+//                        btnIntent.visibility = View.VISIBLE
+//
+//                        val externLocData = GisView.decodeLocLocation(this@BlankActivity, "f8296b86-4090-49f6-a84c-6fd345f1fc16", 1)
+//                        for (i in externLocData.values.indices) {
+//                            Log.e("values", externLocData.fields[i]+"---"+externLocData.values[i])
+//                        }
+//                        Log.e("externLocData", externLocData.lat.toString()+","+externLocData.lng.toString()+","+externLocData.buildingId+","+externLocData.floorId+","+externLocData.roomCode)
+//                    }
+//                }
+//            }
+//
+//            override fun onIVASMappingFailed(msg: String?) {
+//                mUIHandler.post {
+//                    Toast.makeText(this@BlankActivity, msg, Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        })
 
         //获取对应经纬度的园区信息
-        GisView.queryWorkspace(114.0576151013374200, 22.6573017046106460) { loc ->
+        GisView.queryWorkspace(114.057771, 22.656049) { loc ->
             mUIHandler.post {
                 if (loc != null && loc.isNotEmpty()) {
                     for (i in 0 until loc.size) {
@@ -78,11 +79,11 @@ class BlankActivity : Activity() {
         }
 
         gisView.setLogEnable(true)
-        gisView.loadMap(5, doubleArrayOf(22.6573017046106460, 114.0576151013374200))
+        gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
 //        gisView.addMapLoadedListener { Toast.makeText(this@BlankActivity, "地图加载完成", Toast.LENGTH_SHORT).show() }
 
         //poi查询，获取对应经纬度下园区信息、地理位置信息等，需要实例化gisview以后使用
-        gisView.getAddressOfLocation(114.0576151013374200, 22.6573017046106460) { loc ->
+        gisView.getAddressOfLocation(114.057771, 22.656049) { loc ->
             mUIHandler.post {
                 if (loc != null && loc.isNotEmpty()) {
                     for (i in 0 until loc.size) {
