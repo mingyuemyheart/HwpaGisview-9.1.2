@@ -372,26 +372,35 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.loadF3 -> gisView.showIndoorMap("J01", "F03", this)
             R.id.removeLayer -> gisView.removeIndoorLayer()
             R.id.roomstyle -> {
-                val roomStyle = RoomStyle()
-                roomStyle.lineColor = Color.parseColor("#909000")
-                roomStyle.lineOpacity = 150
-                roomStyle.lineWidth = 2
-                roomStyle.fillColor = Color.parseColor("#009090")
-                roomStyle.fillOpacity = 128
-                roomStyle.textColor = Color.WHITE
-                roomStyle.isShowText = true
-                gisView.setRoomStyle("J01", "F01", "1L45R", roomStyle)
+                gisView.showIndoorMap("J01", "F01", this)
+
+                Handler().postDelayed({
+                    val roomStyle = RoomStyle()
+                    roomStyle.lineColor = Color.parseColor("#909000")
+                    roomStyle.lineOpacity = 150
+                    roomStyle.lineWidth = 2
+                    roomStyle.fillColor = Color.parseColor("#009090")
+                    roomStyle.fillOpacity = 128
+                    roomStyle.textColor = Color.WHITE
+                    roomStyle.isShowText = true
+                    gisView.setRoomStyle("J01", "F01", "1L45R", roomStyle)
+                }, 2000)
             }
             R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L45R", null)
             R.id.typestyle -> {
                 gisView.showIndoorMap("J01", "F01", this)
-                val roomStyle = RoomStyle()
-                roomStyle.lineColor = Color.parseColor("#ff0000")
-                roomStyle.lineOpacity = 150
-                roomStyle.lineWidth = 2
-                roomStyle.fillColor = Color.parseColor("#ff9090")
-                roomStyle.fillOpacity = 128
-                gisView.setRoomStyle("J01", "F01", "家具", "TYPE", roomStyle)
+
+                //加2000延时，为了让室内地图渲染完毕
+                Handler().postDelayed({
+                    val roomStyle = RoomStyle()
+                    roomStyle.lineColor = Color.parseColor("#ff0000")
+                    roomStyle.lineOpacity = 150
+                    roomStyle.lineWidth = 2
+                    roomStyle.fillColor = Color.parseColor("#ff9090")
+                    roomStyle.fillOpacity = 128
+                    gisView.setRoomStyle("J01", "F01", "家具", "TYPE", roomStyle)
+                }, 2000)
+
             }
             R.id.deltypestyle -> {
                 gisView.showIndoorMap("J01", "F01", this)
