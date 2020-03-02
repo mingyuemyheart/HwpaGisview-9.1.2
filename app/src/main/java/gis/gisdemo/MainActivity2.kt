@@ -25,6 +25,7 @@ import android.widget.Toast
 import com.supermap.imobilelite.maps.Point2D
 import gis.hmap.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.random.Random
 
 class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListener, GeoServiceCallback, IndoorCallback, ZoomToIndoorListener,
         CalculateRouteListener, MarkerListener, BuildingListener, ModelListener, ZoomListener, MapListener, LocationListener, QueryCallback,
@@ -84,7 +85,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
     }
 
     private fun initMap() {
-        gisView.setLogEnable(true)
+        Common.setLogEnable(true)
         gisView.setMaxZoomLevel(18)
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
         gisView.setRouteFacility(
@@ -113,10 +114,10 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.loadMap -> gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
             R.id.setCenter -> {
                 gisView.setCenter(22.656049, 114.057771)
-                Toast.makeText(this, String.format("中心：%f, %f", gisView.center[0], gisView.center[1]), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, String.format("中心：%s, %s", gisView.center[0], gisView.center[1]), Toast.LENGTH_SHORT).show()
             }
             R.id.getCenter -> {
-                Toast.makeText(this, String.format("中心：%f, %f", gisView.center[0], gisView.center[1]), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, String.format("中心：%s, %s", gisView.center[0], gisView.center[1]), Toast.LENGTH_SHORT).show()
             }
             R.id.zoom1 -> gisView.zoom = 1
             R.id.zoom7 -> gisView.zoom = 7
@@ -127,17 +128,22 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.partScreen -> gisView.setGisViewLayoutParams(500, 500)
 
 
-            R.id.hidelevel -> gisView.setHideLevel(2)
+            R.id.hidelevel -> {
+                gisView.setHideLevel(2)
+                Toast.makeText(this, "地图zoom=2级别图层上所有比较隐藏成功", Toast.LENGTH_SHORT).show()
+            }
             R.id.indoorlevel -> {
                 //参数一设置为0，关闭放大到一定级别显示室内功能
                 //参数二不设置回调对象，需要设置默认开启的室内楼层
 //            gisView.setSwitchIndoor(4, null, "F1");
                 //参数三设置回调对象，默认楼层参数被忽略，回调参数含有buildingId，可自行处理显示室内或其他效果
                 gisView.setSwitchIndoor(4, this, "")
+                Toast.makeText(this, "显示室内级别=4时，成功", Toast.LENGTH_SHORT).show()
             }
 
 
-            R.id.addMarker -> {
+            R.id.addMarker, R.id.addMarkerUrl -> {
+                removeMarkers()
 //                val drawable = R.layout.layout_marker.layoutToDrawable()
 //                val markers = arrayOfNulls<GeneralMarker>(2)
 //                for (i in 0 .. 1) {
@@ -157,15 +163,17 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                         128, 128, null))
                 gisView.addMarker("lm01", 999, markers)
             }
-            R.id.addMarkerUrl -> {
-                val markers = arrayOf(GeneralMarker(
-                        doubleArrayOf(22.655299, 114.058249),
-                        String.format("layout_marker%d", cnt++), "./images/pic1.png", 96, 96, null), GeneralMarker(
-                        doubleArrayOf(22.655299, 114.058249),
-                        String.format("layout_marker%d", cnt++), "./images/pic2.png", 96, 96, null))
-                gisView.addMarker("lm01", 999, markers)
-            }
-            R.id.addFlashMarker -> {
+//            R.id.addMarkerUrl -> {
+//                removeMarkers()
+//                val markers = arrayOf(GeneralMarker(
+//                        doubleArrayOf(22.655299, 114.058249),
+//                        String.format("layout_marker%d", cnt++), "./images/pic1.png", 96, 96, null), GeneralMarker(
+//                        doubleArrayOf(22.655299, 114.058249),
+//                        String.format("layout_marker%d", cnt++), "./images/pic2.png", 96, 96, null))
+//                gisView.addMarker("lm01", 999, markers)
+//            }
+            R.id.addFlashMarker, R.id.addFlashMarkerUrl -> {
+                removeMarkers()
                 val ani = arrayOf(resources.getDrawable(R.drawable.marker_1, null), resources.getDrawable(R.drawable.marker_2, null), resources.getDrawable(R.drawable.marker_3, null), resources.getDrawable(R.drawable.marker_4, null), resources.getDrawable(R.drawable.marker_5, null))
                 val markers = arrayOf(FlashMarker(
                         doubleArrayOf(22.655299, 114.058249),
@@ -175,16 +183,25 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 //gisView.addMarker("lm02", 999, markers);
                 gisView.addFlashMarker("lm02", 999, markers)
             }
-            R.id.addFlashMarkerUrl -> {
-                val ani = arrayOf("./images/1.png", "./images/2.png", "./images/3.png", "./images/4.png", "./images/5.png")
-                val markers = arrayOf(FlashMarker(
-                        doubleArrayOf(22.655299, 114.058249),
-                        String.format("layout_marker%d", cnt++), ani, 500, 10000, 96, 96, null), FlashMarker(
-                        doubleArrayOf(22.655299, 114.058249),
-                        String.format("layout_marker%d", cnt++), ani, 500, 10000, 96, 96, null))
-                gisView.addFlashMarker("lm02", 999, markers)
-            }
+//            R.id.addFlashMarkerUrl -> {
+//                removeMarkers()
+//                val ani = arrayOf("./images/1.png", "./images/2.png", "./images/3.png", "./images/4.png", "./images/5.png")
+//                val markers = arrayOf(FlashMarker(
+//                        doubleArrayOf(22.655299, 114.058249),
+//                        String.format("layout_marker%d", cnt++), ani, 500, 10000, 96, 96, null), FlashMarker(
+//                        doubleArrayOf(22.655299, 114.058249),
+//                        String.format("layout_marker%d", cnt++), ani, 500, 10000, 96, 96, null))
+//                gisView.addFlashMarker("lm02", 999, markers)
+//            }
             R.id.markerPos -> {
+                removeMarkers()
+                val markers = arrayOf(
+                        GeneralMarker(doubleArrayOf(22.655299, 114.058249),
+                                String.format("layout_marker1", cnt++),
+                                resources.getDrawable(R.drawable.red_marker, null),
+                                128, 128, null))
+                gisView.addMarker("lm01", 999, markers)
+
                 val lat = (Math.random() - 0.5) * 0.00028 + 22.655299
                 val lng = (Math.random() - 0.5) * 0.0005 + 114.058249
                 gisView.changeMarkerPosition("layout_marker1", lat, lng) //设置marker位置
@@ -268,12 +285,14 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                         Color.RED, "none", "none", 8, 120)
                 gisView.drawCustomPath(routePoints)
             }
+            R.id.removeBounds -> gisView.clearPath()
             R.id.encodeAddress -> gisView.getAddressOfLocation(114.055225, 22.653405, this)
             R.id.decodeAddress -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("搜索地址")
                 val input = EditText(this)
                 input.inputType = InputType.TYPE_CLASS_TEXT
+                input.setText("华为基地")
                 builder.setView(input)
                 builder.setPositiveButton("搜索") { dialog, which ->
                     val data = input.text.toString()
@@ -281,6 +300,10 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 }
                 builder.setNegativeButton("取消") { dialog, which -> dialog.cancel() }
                 builder.show()
+            }
+            R.id.removeAddress -> {
+                removeMarkers()
+                gisView.closePopup()
             }
             R.id.getBuilding -> gisView.getBuldingInfo(Common.parkId(), "J03", this)
             R.id.getObject -> gisView.queryObject(Common.parkId(), "1号楼", this)
@@ -340,13 +363,13 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                     }
                 }
             }
+            R.id.removeDate -> gisView.closePopup()
 
 
             R.id.loadB1 -> gisView.showIndoorMap("J01", "B01")
             R.id.loadF1 -> gisView.showIndoorMap("J01", "F01", this)
             R.id.loadF2 -> gisView.showIndoorMap("J01", "F02", this)
             R.id.loadF3 -> gisView.showIndoorMap("J01", "F03", this)
-            R.id.loadF4 -> gisView.showIndoorMap("J01", "F04", this)
             R.id.removeLayer -> gisView.removeIndoorLayer()
             R.id.roomstyle -> {
                 val roomStyle = RoomStyle()
@@ -361,6 +384,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             }
             R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L45R", null)
             R.id.typestyle -> {
+                gisView.showIndoorMap("J01", "F01", this)
                 val roomStyle = RoomStyle()
                 roomStyle.lineColor = Color.parseColor("#ff0000")
                 roomStyle.lineOpacity = 150
@@ -369,42 +393,45 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 roomStyle.fillOpacity = 128
                 gisView.setRoomStyle("J01", "F01", "家具", "TYPE", roomStyle)
             }
-            R.id.deltypestyle -> gisView.setRoomStyle("J01", "F01", "家具", "TYPE", null)
+            R.id.deltypestyle -> {
+                gisView.showIndoorMap("J01", "F01", this)
+                gisView.setRoomStyle("J01", "F01", "家具", "TYPE", null)
+            }
             R.id.loadOutdoor -> gisView.switchOutdoor()
-            R.id.displayPerimeter -> {
-                //显示周界
-                gisView.displayPerimeter(
-                        "1",
-                        "#0000FF",
-                        20,
-                        50,
-                        "#FF00FF",
-                        40,
-                        50,
-                        intArrayOf(10, 12, 14, 16))
-            }
-            R.id.displayPerimeter2 -> {
-                //显示周界
-                gisView.displayPerimeter(
-                        "1",
-                        "#0000FF",
-                        20,
-                        50,
-                        "#FF0000",
-                        40,
-                        50,
-                        intArrayOf(10, 12))
-            }
-            R.id.removePerimeter -> gisView.removePerimeter()
+//            R.id.displayPerimeter -> {
+//                //显示周界
+//                gisView.displayPerimeter(
+//                        "1",
+//                        "#0000FF",
+//                        20,
+//                        50,
+//                        "#FF00FF",
+//                        40,
+//                        50,
+//                        intArrayOf(10, 12, 14, 16))
+//            }
+//            R.id.displayPerimeter2 -> {
+//                //显示周界
+//                gisView.displayPerimeter(
+//                        "1",
+//                        "#0000FF",
+//                        20,
+//                        50,
+//                        "#FF0000",
+//                        40,
+//                        50,
+//                        intArrayOf(10, 12))
+//            }
+//            R.id.removePerimeter -> gisView.removePerimeter()
             R.id.parking1 -> {
                 gisView.showIndoorMap(GisView.TYPE_PARKING, "J01", "B01", this)
                 gisView.showModelHighlight(Common.parkId(), "J01", "B01", arrayOf("A22","A21","C23","B55","车位"))
 //                gisView.showModelHighlight(Common.parkId(), "J01", "B01", arrayOf("001","002","088","050A","052A"))//天安云谷的点
             }
-            R.id.parking2 -> {
-                gisView.showIndoorMap(GisView.TYPE_PARKING, "J5MB", "B01", this)
-                gisView.showModelHighlight(Common.parkId(), "J5MB", "B01", arrayOf("车位","车位","车位"))
-            }
+//            R.id.parking2 -> {
+//                gisView.showIndoorMap(GisView.TYPE_PARKING, "J5MB", "B01", this)
+//                gisView.showModelHighlight(Common.parkId(), "J5MB", "B01", arrayOf("车位","车位","车位"))
+//            }
             R.id.disableHighlight -> {
                 gisView.removeModelhighlighting()
                 gisView.switchOutdoor()
@@ -422,26 +449,13 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 gisView.drawCustomPath(routePoints)
             }
             R.id.caclRoute -> {
+                gisView.showIndoorMap("J01", "F01", this)
+                gisView.addRouteListener(this)
+
                 val ps = PresentationStyle()
                 ps.opacity = 120
                 ps.fillColor = Color.parseColor("#02D6F2")
                 ps.lineWidth = 20
-//                gisView.calcRoutePath(
-//                        RoutePoint(doubleArrayOf(22.655674, 114.05721),
-//                                Color.parseColor("#F20216"),
-//                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
-//                        RoutePoint(doubleArrayOf(22.65592, 114.05719),
-//                                Color.parseColor("#F20216"),
-//                                "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
-//                        ps)
-//                gisView.calcRoutePath(
-//                        RoutePoint(doubleArrayOf(22.656435262118833, 114.05781090259555),
-//                                Color.parseColor("#F20216"),
-//                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
-//                        RoutePoint(doubleArrayOf(22.657056542510674, 114.05674874782564),
-//                                Color.parseColor("#F20216"),
-//                                "J01", "B01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
-//                        ps)
                 gisView.calcRoutePath(
                         RoutePoint(doubleArrayOf(22.655797, 114.058116),
                                 Color.parseColor("#FFFFFF"),
@@ -451,10 +465,16 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                                 "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
                         ps)
             }
-            R.id.clearRoute -> gisView.clearPath()
-            R.id.pathPlanData -> gisView.getPathPlanData(
-                    RoutePoint(doubleArrayOf(22.655674, 114.05721), "J01", "F01"),
-                    RoutePoint(doubleArrayOf(22.65592, 114.05719), "J01", "F01"))
+            R.id.clearRoute -> {
+                gisView.clearPath()
+                gisView.switchOutdoor()
+            }
+            R.id.pathPlanData -> {
+                gisView.getPathPlanDataListener(this)
+                gisView.getPathPlanData(
+                        RoutePoint(doubleArrayOf(22.655797, 114.058116), "J01", "F01"),
+                        RoutePoint(doubleArrayOf(22.656244, 114.057558), "J01", "F01"))
+            }
             R.id.showHeatmap -> {
                 //生成热力图
                 //22.972860320987436, 113.35606992244722
@@ -489,12 +509,24 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             R.id.delRoute -> gisView.removeRouteListener()
             R.id.addPathPlan -> gisView.getPathPlanDataListener(this)
             R.id.delPathPlan -> gisView.removePathPlanDataListener()
-            R.id.startloc -> gisView.startLocate()
-            R.id.stoploc -> gisView.stopLocate()
+            R.id.startloc -> {
+                gisView.startLocate()
+                Toast.makeText(this, "开始定位...", Toast.LENGTH_SHORT).show()
+            }
+            R.id.stoploc -> {
+                gisView.stopLocate()
+                Toast.makeText(this, "停止定位...", Toast.LENGTH_SHORT).show()
+            }
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun removeMarkers() {
+        for (i in 0 .. cnt) {
+            gisView.deleteMarker(String.format("layout_marker%d", i))
+        }
     }
 
     /**
@@ -506,7 +538,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 val c = loc[i]
                 val markers = arrayOf(GeneralMarker(
                         doubleArrayOf(c.lat, c.lng),
-                        c.cnName,
+                        String.format("layout_marker%d", cnt++),/*c.cnName*/
                         resources.getDrawable(R.drawable.tag_pin, null),
                         72, 72, null))
                 gisView.addMarker("lm01", 999, markers)
@@ -572,7 +604,9 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
      * 获取路径规划数据失败回调
      */
     override fun pathPlanDataFailed(msg: String?) {
-        Toast.makeText(this@MainActivity2, msg, Toast.LENGTH_SHORT).show()
+        mUIHandler.post {
+            Toast.makeText(this@MainActivity2, msg, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**

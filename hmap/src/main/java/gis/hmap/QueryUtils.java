@@ -5,7 +5,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.supermap.services.components.commontypes.Rectangle2D;
 import com.supermap.imobilelite.commons.EventStatus;
 import com.supermap.imobilelite.data.GetFeaturesByGeometryService;
 import com.supermap.imobilelite.data.GetFeaturesBySQLParameters;
@@ -15,6 +14,7 @@ import com.supermap.imobilelite.maps.Point2D;
 import com.supermap.services.components.commontypes.Feature;
 import com.supermap.services.components.commontypes.Geometry;
 import com.supermap.services.components.commontypes.QueryParameter;
+import com.supermap.services.components.commontypes.Rectangle2D;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,12 +23,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Created by Ryan on 2018/10/16.
  */
-
- class QueryUtils {
+class QueryUtils {
+    
+    private static String dataUrl = Common.getHost() + Common.DATA_URL();
 
     public static class BuildingResult {
         public Feature feature;
@@ -67,7 +67,7 @@ import java.util.Map;
             queryParameter.name = name;
             sqlParameters.queryParameter = queryParameter;
 
-            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
             try {
@@ -130,7 +130,7 @@ import java.util.Map;
             queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
-            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
             try {
@@ -316,7 +316,7 @@ import java.util.Map;
             queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
-            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
             try {
@@ -456,7 +456,7 @@ import java.util.Map;
             queryParameter.name = "PMTR@" + Common.parkId();
             sqlParameters.queryParameter = queryParameter;
 
-            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
             try {
@@ -564,7 +564,7 @@ import java.util.Map;
             queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
             sqlParameters.queryParameter = queryParameter;
 
-            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost()+Common.DATA_URL());
+            GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
             MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
             sqlService.process(sqlParameters, listener);
             try {
@@ -682,7 +682,7 @@ import java.util.Map;
         queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
         try {
@@ -708,7 +708,7 @@ import java.util.Map;
         queryParameter.attributeFilter = String.format("SMSDRIW <= %f AND SMSDRIE >= %f AND SMSDRIN >= %f AND SMSDRIS <= %f", lng, lng, lat, lat);
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
 
@@ -740,7 +740,7 @@ import java.util.Map;
         queryParameter.attributeFilter = filter;
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
 
@@ -769,7 +769,7 @@ import java.util.Map;
         queryParameter.name = "buildings@" + Common.parkId();
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
         try {
@@ -801,7 +801,7 @@ import java.util.Map;
         queryParameter.attributeFilter = "BuildingId = \"" + buildingId + "\"";
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
         try {
@@ -827,7 +827,7 @@ import java.util.Map;
         QueryParameter queryParameter = new QueryParameter();
         sqlParameters.queryParameter = queryParameter;
 
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.DATA_URL());
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(dataUrl);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
         try {
@@ -945,12 +945,12 @@ import java.util.Map;
         QueryParameter queryParameter = new QueryParameter();
         sqlParameters.queryParameter = queryParameter;
 
-        String dataUrl;
+        String url;
         if (global)
-            dataUrl = Common.GLOBALDATA_URL();
+            url = Common.GLOBALDATA_URL();
         else
-            dataUrl = Common.DATA_URL();
-        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + dataUrl);
+            url = Common.DATA_URL();
+        GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + url);
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
         try {

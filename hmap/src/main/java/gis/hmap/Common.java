@@ -25,6 +25,15 @@ import java.util.logging.SimpleFormatter;
  */
 
 public class Common {
+
+    private static boolean logEnable = false;
+    public static void setLogEnable(boolean enable) {
+        logEnable = enable;
+    }
+    public static boolean isLogEnable() {
+        return logEnable;
+    }
+
     private static Common _instance = null;
     private String host = "http://192.168.1.100:8090/iserver";
     private String rtlsLicenseHost = "https://10.240.155.52:18889";

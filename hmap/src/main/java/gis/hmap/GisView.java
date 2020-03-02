@@ -13,7 +13,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -28,7 +27,6 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
-import com.supermap.imobilelite.maps.AbstractTileLayerView;
 import com.supermap.imobilelite.maps.BoundingBox;
 import com.supermap.imobilelite.maps.DefaultItemizedOverlay;
 import com.supermap.imobilelite.maps.DrawableOverlay;
@@ -39,7 +37,6 @@ import com.supermap.imobilelite.maps.MapView;
 import com.supermap.imobilelite.maps.Overlay;
 import com.supermap.imobilelite.maps.Point2D;
 import com.supermap.imobilelite.maps.PolygonOverlay;
-import com.supermap.imobilelite.maps.RMGLCanvas;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -67,12 +64,6 @@ import java.util.logging.Level;
 public class GisView extends RelativeLayout implements Overlay.OverlayTapListener, MapView.MapViewEventListener, AMapLocationListener {
 
     public static String TAG = "GisView-";
-
-    private boolean logEnable = false;
-    public void setLogEnable(boolean logEnable) {
-        this.logEnable = logEnable;
-    }
-
     private int indoorZIndex = -10;//室内地图
     private int parkingZIndex = -9;//室内停车场
     private Handler mUIHandler = new Handler();
@@ -182,7 +173,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 }
             }
         } else {
-            if (logEnable) {
+            if (Common.isLogEnable()) {
                 Log.e(TAG+"onLocationChanged","errCode:" + amapLocation.getErrorCode() + ",errInfo:" + amapLocation.getErrorInfo());
             }
         }
@@ -450,7 +441,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
            String ret = "[]";
             try {
                 String url = String.format("%s%s?address=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(), Common.GEO_CODE_URL(), address, count);
-                if (logEnable) {
+                if (Common.isLogEnable()) {
                     Log.e(TAG+"getLocationOfAddress", url);
                 }
                 ret = getStringFromURL(url);
@@ -522,7 +513,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             String ret = "[]";
             try {
                 String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(),Common.GEO_DECODE_URL(), lng, lat, radius, count);
-                if (logEnable) {
+                if (Common.isLogEnable()) {
                     Log.e("getAddressOfLocation", url);
                 }
                 ret = getStringFromURL(url);
@@ -1185,7 +1176,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 GeoLocation geoLocation = loc[0];
                 if (!TextUtils.isEmpty(geoLocation.address)) {
                     String[] addr = geoLocation.address.split(",");
-                    if (logEnable) {
+                    if (Common.isLogEnable()) {
                         Log.e("loadMap", geoLocation.address);
                     }
                     if (addr.length > 0) {
@@ -1238,7 +1229,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         if (outdoorLayer == null) {
             outdoorLayer = new LayerView(getContext());
             String outdoorUrl = Common.getHost() + Common.MAP_URL();
-            if (logEnable) {
+            if (Common.isLogEnable()) {
                 Log.e("outdoorUrl", outdoorUrl);
             }
             outdoorLayer.setURL(outdoorUrl);
@@ -1295,7 +1286,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     public void setCenter(double lat, double lng) {
         MapController controller = mapView.getController();
         controller.setCenter(new Point2D(lng, lat));
-        if (logEnable) {
+        if (Common.isLogEnable()) {
             Log.e(TAG+"setCenter", "lat="+lat+",lng="+lng);
         }
         fitHeatmapToView(false);
@@ -1363,7 +1354,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      */
     public void zoomInMap() {
         mapView.zoomIn();
-        if (logEnable) {
+        if (Common.isLogEnable()) {
             Log.e(TAG+"zoomInMap", mapView.getZoomLevel()+"");
         }
     }
@@ -1859,7 +1850,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         if (indoorLayer == null) {
             indoorLayer = new LayerView(getContext());
             String indoorUrl = String.format("%s/map-ugcv5-%s_%s_%s/rest/maps/%s_%s_%s", Common.getHost(), Common.parkId(), buildingId, floorid, Common.parkId(), buildingId, floorid);
-            if (logEnable) {
+            if (Common.isLogEnable()) {
                 Log.e("indoorUrl", indoorUrl);
             }
             indoorLayer.setURL(indoorUrl);
@@ -2345,7 +2336,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                     if (!TextUtils.isEmpty(Common.ROMA_KEY)) {
                         url += "&" + Common.ROMA_KEY;
                     }
-                    if (logEnable) {
+                    if (Common.isLogEnable()) {
                         Log.e(TAG+"queryObject", url);
                     }
                     ret = getStringFromURL(url);
@@ -2418,7 +2409,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                         if (!TextUtils.isEmpty(Common.ROMA_KEY)) {
                             url += "&" + Common.ROMA_KEY;
                         }
-                        if (logEnable) {
+                        if (Common.isLogEnable()) {
                             Log.e(TAG+"getBuldingInfo", url);
                         }
                         ret = getStringFromURL(url);

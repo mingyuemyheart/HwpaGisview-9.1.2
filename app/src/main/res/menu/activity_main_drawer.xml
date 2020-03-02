@@ -114,6 +114,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="获取可视边界" />
         <item
+            android:id="@+id/removeBounds"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="清除可视边界" />
+        <item
             android:id="@+id/encodeAddress"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="坐标➡️地址" />
@@ -121,6 +125,10 @@
             android:id="@+id/decodeAddress"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="地址➡️坐标" />
+        <item
+            android:id="@+id/removeAddress"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="清除地址和️坐标" />
         <item
             android:id="@+id/getBuilding"
             android:icon="@drawable/ic_menu_slideshow"
@@ -141,6 +149,10 @@
             android:id="@+id/objdata"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="查询数据" />
+        <item
+            android:id="@+id/removeDate"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="清除查询数据" />
     </group>
 
     <group
@@ -162,10 +174,6 @@
             android:id="@+id/loadF3"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="J01 F03" />
-        <item
-            android:id="@+id/loadF4"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="J01 F04" />
         <item
             android:id="@+id/removeLayer"
             android:icon="@drawable/ic_menu_slideshow"
@@ -190,26 +198,26 @@
             android:id="@+id/loadOutdoor"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="回到室外" />
-        <item
-            android:id="@+id/displayPerimeter"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="显示周界" />
-        <item
-            android:id="@+id/displayPerimeter2"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="显示周界2" />
-        <item
-            android:id="@+id/removePerimeter"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="隐藏周界" />
+<!--        <item-->
+<!--            android:id="@+id/displayPerimeter"-->
+<!--            android:icon="@drawable/ic_menu_slideshow"-->
+<!--            android:title="显示周界" />-->
+<!--        <item-->
+<!--            android:id="@+id/displayPerimeter2"-->
+<!--            android:icon="@drawable/ic_menu_slideshow"-->
+<!--            android:title="显示周界2" />-->
+<!--        <item-->
+<!--            android:id="@+id/removePerimeter"-->
+<!--            android:icon="@drawable/ic_menu_slideshow"-->
+<!--            android:title="隐藏周界" />-->
         <item
             android:id="@+id/parking1"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="J01高亮" />
-        <item
-            android:id="@+id/parking2"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="J5MB高亮" />
+<!--        <item-->
+<!--            android:id="@+id/parking2"-->
+<!--            android:icon="@drawable/ic_menu_slideshow"-->
+<!--            android:title="J5MB高亮" />-->
         <item
             android:id="@+id/disableHighlight"
             android:icon="@drawable/ic_menu_slideshow"

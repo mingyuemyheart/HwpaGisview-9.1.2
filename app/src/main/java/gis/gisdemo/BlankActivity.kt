@@ -7,11 +7,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.TextUtils
 import android.util.Log
-import android.view.View
-import android.widget.Toast
+import gis.hmap.Common
 import gis.hmap.GisView
-import gis.hmap.IVASMappingData
-import gis.hmap.IVASMappingListener
 import kotlinx.android.synthetic.main.activity_blank.*
 
 class BlankActivity : Activity() {
@@ -30,6 +27,7 @@ class BlankActivity : Activity() {
             startActivity(Intent(this@BlankActivity, MainActivity2::class.java))
         }
 
+        Common.setLogEnable(true)
 //        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
 //        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
         GisView.setGisServer("http://192.168.1.249:8090/iserver/services")
@@ -78,7 +76,6 @@ class BlankActivity : Activity() {
             GisView.enableAutoClearCache(true)
         }
 
-        gisView.setLogEnable(true)
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
 //        gisView.addMapLoadedListener { Toast.makeText(this@BlankActivity, "地图加载完成", Toast.LENGTH_SHORT).show() }
 
