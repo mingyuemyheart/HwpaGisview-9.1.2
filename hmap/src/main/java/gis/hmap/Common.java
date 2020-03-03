@@ -1,7 +1,6 @@
 package gis.hmap;
 
 import android.content.Context;
-import android.graphics.Path;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,19 +22,22 @@ import java.util.logging.SimpleFormatter;
 /**
  * Created by Ryan on 2018/10/18.
  */
-
 public class Common {
 
-    private static boolean logEnable = false;
+    private static Common _instance = null;
+    private boolean logEnable = false;
     public static void setLogEnable(boolean enable) {
-        logEnable = enable;
+        if (_instance == null)
+            _instance = new Common();
+        _instance.logEnable = enable;
     }
     public static boolean isLogEnable() {
-        return logEnable;
+        if (_instance == null)
+            _instance = new Common();
+        return _instance.logEnable;
     }
 
-    private static Common _instance = null;
-    private String host = "http://192.168.1.100:8090/iserver";
+    private String host = "http://support.supermap.com.cn:8090/iserver/services";
     private String rtlsLicenseHost = "https://10.240.155.52:18889";
     private String workSpace = "china400";
     private String parkId = "China";
@@ -305,10 +307,8 @@ public class Common {
 
     public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(10);
 
-    public static String tileFileExists(String tilename)
-    {
+    public static String tileFileExists(String tilename) {
         String ret = null;
-
         try {
             String path = Environment.getExternalStorageDirectory().getAbsolutePath() + MBTILES_ROOT_LOCAL + "/" + tilename;
             File file = new File(path);
@@ -317,60 +317,54 @@ public class Common {
         } catch (Exception e) {
             Log.e("DOWNLOAD", "check MBTiles error: " + e.getMessage(), e);
         }
-
         return ret;
     }
 
-    public static void downloadMBTiles(final String tilename)
-    {
+    public static void downloadMBTiles(final String tilename) {
         final String url = getHost() + MBTILES_ROOT + tilename;
         final String path = Environment.getExternalStorageDirectory().getAbsolutePath() + MBTILES_ROOT_LOCAL;
 
         try {
             File file = new File(path);
-            if(!file.exists()){
+            if (!file.exists()) {
                 file.mkdirs();
             }
         } catch (Exception e) {
             Log.e("DOWNLOAD", "error: " + e.getMessage(), e);
         }
 
-        fixedThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    final long startTime = System.currentTimeMillis();
-                    Log.i("DOWNLOAD","startTime="+startTime);
-                    URL myURL = new URL(url);
-                    URLConnection conn = myURL.openConnection();
-                    conn.connect();
-                    InputStream is = conn.getInputStream();
-                    int fileSize = conn.getContentLength();//根据响应获取文件大小
-                    if (fileSize <= 0) throw new RuntimeException("无法获知文件大小 ");
-                    if (is == null) throw new RuntimeException("stream is null");
-                    //把数据存入路径+文件名
-                    FileOutputStream fos = new FileOutputStream(path+"/"+tilename);
-                    byte buf[] = new byte[1024];
-                    int downLoadFileSize = 0;
-                    do{
-                        //循环读取
-                        int numread = is.read(buf);
-                        if (numread == -1)
-                        {
-                            break;
-                        }
-                        fos.write(buf, 0, numread);
-                        downLoadFileSize += numread;
-                        //更新进度条
-                    } while (true);
+        fixedThreadPool.execute(() -> {
+            try {
+                final long startTime = System.currentTimeMillis();
+                Log.i("DOWNLOAD", "startTime=" + startTime);
+                URL myURL = new URL(url);
+                URLConnection conn = myURL.openConnection();
+                conn.connect();
+                InputStream is = conn.getInputStream();
+                int fileSize = conn.getContentLength();//根据响应获取文件大小
+                if (fileSize <= 0) throw new RuntimeException("无法获知文件大小 ");
+                if (is == null) throw new RuntimeException("stream is null");
+                //把数据存入路径+文件名
+                FileOutputStream fos = new FileOutputStream(path + "/" + tilename);
+                byte buf[] = new byte[1024];
+                int downLoadFileSize = 0;
+                do {
+                    //循环读取
+                    int numread = is.read(buf);
+                    if (numread == -1) {
+                        break;
+                    }
+                    fos.write(buf, 0, numread);
+                    downLoadFileSize += numread;
+                    //更新进度条
+                } while (true);
 
-                    Log.i("DOWNLOAD","download success:" + downLoadFileSize);
-                    Log.i("DOWNLOAD","totalTime="+ (System.currentTimeMillis() - startTime));
+                Log.i("DOWNLOAD", "download success:" + downLoadFileSize);
+                Log.i("DOWNLOAD", "totalTime=" + (System.currentTimeMillis() - startTime));
 
-                    is.close();
-                } catch (Exception ex) {
-                    Log.e("DOWNLOAD", "error: " + ex.getMessage(), ex);
-                }
+                is.close();
+            } catch (Exception ex) {
+                Log.e("DOWNLOAD", "error: " + ex.getMessage(), ex);
             }
         });
     }

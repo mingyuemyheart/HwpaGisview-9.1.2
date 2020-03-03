@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.TextUtils
 import android.util.Log
+import android.widget.Toast
 import gis.hmap.Common
 import gis.hmap.GisView
 import kotlinx.android.synthetic.main.activity_blank.*
@@ -28,8 +29,6 @@ class BlankActivity : Activity() {
         }
 
         Common.setLogEnable(true)
-//        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
-//        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
         GisView.setGisServer("http://192.168.1.249:8090/iserver/services")
 //        GisView.setLocDecoder(false, object : IVASMappingListener {
 //            override fun onIVASMappingSuccess(iVasMapping: MutableMap<String, IVASMappingData>?) {
@@ -77,7 +76,7 @@ class BlankActivity : Activity() {
         }
 
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
-//        gisView.addMapLoadedListener { Toast.makeText(this@BlankActivity, "地图加载完成", Toast.LENGTH_SHORT).show() }
+        gisView.addMapLoadedListener { Toast.makeText(this@BlankActivity, "地图加载完成", Toast.LENGTH_SHORT).show() }
 
         //poi查询，获取对应经纬度下园区信息、地理位置信息等，需要实例化gisview以后使用
         gisView.getAddressOfLocation(114.057771, 22.656049) { loc ->

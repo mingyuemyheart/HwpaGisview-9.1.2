@@ -187,8 +187,10 @@ class QueryUtils {
                 rooms = new ArrayList<>();
                 for (int m = 0; m < floor.features.length; m++) {
                     Feature feature = floor.features[m];
-                    for (int i = 0; i < feature.fieldValues.length; i++) {
-                        Log.e("QueryIndoorMapRunnable", feature.fieldNames[i]+"---"+feature.fieldValues[i]);
+                    if (Common.isLogEnable()) {
+                        for (int i = 0; i < feature.fieldValues.length; i++) {
+                            Log.e("QueryIndoorMapRunnable", feature.fieldNames[i]+"---"+feature.fieldValues[i]);
+                        }
                     }
                     Geometry geometry = feature.geometry;
                     List<List<Point2D>> roomPoints = new ArrayList<>();
@@ -649,7 +651,6 @@ class QueryUtils {
 
         public MyGetFeaturesEventListener() {
             super();
-            // TODO Auto-generated constructor stub
         }
 
         public GetFeaturesResult getReult() {
@@ -854,13 +855,11 @@ class QueryUtils {
      */
     public static String[] queryPark(double lat, double lng) {
         GetFeaturesBySQLParameters sqlParameters = new GetFeaturesBySQLParameters();
-        Log.e("queryPark", Common.globalParkId()+":"+Common.globalDataset());
         sqlParameters.datasetNames = new String[] { Common.globalParkId()+":"+Common.globalDataset() };
         sqlParameters.toIndex = 99999;
         QueryParameter queryParameter = new QueryParameter();
         sqlParameters.queryParameter = queryParameter;
 
-        Log.e("queryPark", Common.getHost() + Common.GLOBALDATA_URL());
         GetFeaturesBySQLService sqlService = new GetFeaturesBySQLService(Common.getHost() + Common.GLOBALDATA_URL());
         MyGetFeaturesEventListener listener = new MyGetFeaturesEventListener();
         sqlService.process(sqlParameters, listener);
