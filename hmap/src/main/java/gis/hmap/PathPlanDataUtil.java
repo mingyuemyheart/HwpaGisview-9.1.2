@@ -126,7 +126,11 @@ public class PathPlanDataUtil {
                 params.nodes = pts.toArray();
 
                 try {
-                    FindPathService path = new FindPathService(Common.getHost() + Common.TRANSPORT_URL(waysec.get(0).floor));
+                    String dataUrl = Common.getHost() + Common.TRANSPORT_URL(waysec.get(0).floor);
+                    if (Common.isLogEnable()) {
+                        Log.e("FindPathService", dataUrl);
+                    }
+                    FindPathService path = new FindPathService(dataUrl);
                     MyFindPathEventListener listener = new MyFindPathEventListener();
                     path.process(params, listener);
                     try {

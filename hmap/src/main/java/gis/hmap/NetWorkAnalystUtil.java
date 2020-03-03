@@ -3,6 +3,7 @@ package gis.hmap;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.supermap.imobilelite.commons.EventStatus;
 import com.supermap.imobilelite.maps.BoundingBox;
@@ -148,7 +149,11 @@ class NetWorkAnalystUtil {
                 params.nodes = pts.toArray();
 
                 try {
-                    FindPathService path = new FindPathService(Common.getHost() + Common.TRANSPORT_URL(waysec.get(0).floor));
+                    String dataUrl = Common.getHost() + Common.TRANSPORT_URL(waysec.get(0).floor);
+                    if (Common.isLogEnable()) {
+                        Log.e("FindPathService", dataUrl);
+                    }
+                    FindPathService path = new FindPathService(dataUrl);
                     MyFindPathEventListener listener = new MyFindPathEventListener();
                     path.process(params, listener);
                     try {

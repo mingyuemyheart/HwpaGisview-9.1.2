@@ -589,7 +589,9 @@ class QueryUtils {
                         dataMap.put(feature.fieldNames[i], feature.fieldValues[i]);
                     }
                     String parkingId = dataMap.get("PID");
-                    Log.e("parkingId", parkingId);
+                    if (Common.isLogEnable()) {
+                        Log.e("parkingId", parkingId);
+                    }
                     boolean isHighLight = false;
                     int index = 0;
                     if (modIds != null)

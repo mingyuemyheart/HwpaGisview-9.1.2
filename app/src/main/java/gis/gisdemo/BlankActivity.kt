@@ -29,6 +29,7 @@ class BlankActivity : Activity() {
         }
 
         Common.setLogEnable(true)
+//        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
         GisView.setGisServer("http://192.168.1.249:8090/iserver/services")
 //        GisView.setLocDecoder(false, object : IVASMappingListener {
 //            override fun onIVASMappingSuccess(iVasMapping: MutableMap<String, IVASMappingData>?) {

@@ -211,15 +211,13 @@ public class Common {
         return _instance.logger;
     }
 
-    private static final String MBTILES_ROOT = "/MBTiles/";
-    private static final String MBTILES_ROOT_LOCAL = "/supermap/mbtiles";
-    // SuperMap iServer提供的地图采用固定地址传递
-    private static final String MAIN_MAP = "/map-ugcv5-{workSpace}/rest/maps/{parkId}";
-    public static String MAP_URL() {
+    //室外地图
+    private static final String OUTDOOR_MAP = "/map-ugcv5-{workSpace}/rest/maps/{parkId}";
+    public static String OUTDOOR_URL() {
         if (_instance == null)
             return "";
         else {
-            String url = MAIN_MAP.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
+            String url = OUTDOOR_MAP.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
             if (_instance.extParam.size() > 0) {
                for (int i=0; i<_instance.extParam.size(); i++) {
                    if (i == 0)
@@ -231,6 +229,17 @@ public class Common {
             return url;
         }
     }
+
+    //室内地图
+    public static String INDOOR_URL(String buildingId, String floorid) {
+        if (_instance == null)
+            return "";
+        else {
+            return String.format("%s/map-ugcv5-%s_%s_%s/rest/maps/%s_%s_%s", Common.getHost(), Common.parkId(), buildingId, floorid, Common.parkId(), buildingId, floorid);
+        }
+    }
+
+    //
     private static final String BACK_MAP = "/map-ugcv5-{workSpace}/rest/maps/common";
     public static String BACKMAP_URL() {
         if (_instance == null)
@@ -238,6 +247,8 @@ public class Common {
         else
             return BACK_MAP.replace("{workSpace}", _instance.workSpace);
     }
+
+    //查询数据
     private static final String DATA = "/data-{workSpace}/rest/data";
     public static String DATA_URL() {
         if (_instance == null)
@@ -251,18 +262,22 @@ public class Common {
         else
             return DATA.replace("{workSpace}", _instance.globalWorkSpace);
     }
-    private static final String TRANSPORT1 = "/transportationAnalyst-{workSpace}-{parkId}/rest/networkanalyst/{floor}_Network@{parkId}";
-    private static final String TRANSPORT2 = "/transportationAnalyst-{workSpace}-{parkId}-{floor}/rest/networkanalyst/{floor}_Network@{parkId}";
+
+    //路网数据
+    private static final String TRANSPORT1 = "/transportationAnalyst-{workSpace}-{parkId}/rest/networkanalyst/Park_Network@{parkId}";//室外
+    private static final String TRANSPORT2 = "/transportationAnalyst-{workSpace}-{parkId}-{floor}/rest/networkanalyst/{floor}_Network@{parkId}";//室内
     public static String TRANSPORT_URL(String floor) {
         if (_instance == null)
             return "";
         else {
             if (TextUtils.isEmpty(floor))
-                return TRANSPORT1.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId).replace("{floor}", "Park");
+                return TRANSPORT1.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
             else
                 return TRANSPORT2.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId).replace("{floor}", floor);
         }
     }
+
+    //地址查询地理数据
     private static final String GEO_CODE = "/addressmatch-{workSpace}/restjsr/v1/address/geocoding.json";
     public static String GEO_CODE_URL() {
         if (_instance == null)
@@ -270,6 +285,8 @@ public class Common {
         else
             return GEO_CODE.replace("{workSpace}", _instance.workSpace);
     }
+
+    //经纬度查询地理数据
     private static final String GEO_DECODE = "/addressmatch-{workSpace}/restjsr/v1/address/geodecoding.json";
     public static String GEO_DECODE_URL() {
         if (_instance == null)
@@ -286,6 +303,9 @@ public class Common {
             return GEO_DECODE.replace("{workSpace}", _instance.globalWorkSpace);
     }
 
+
+    private static final String MBTILES_ROOT = "/MBTiles/";
+    private static final String MBTILES_ROOT_LOCAL = "/supermap/mbtiles";
     //Rtls
     private static String LicenseServer  = "/garden.guide/guide/requestguide";
     //Roma

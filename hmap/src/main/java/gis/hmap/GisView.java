@@ -1229,7 +1229,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         //栅格瓦片
         if (outdoorLayer == null) {
             outdoorLayer = new LayerView(getContext());
-            String outdoorUrl = Common.getHost() + Common.MAP_URL();
+            String outdoorUrl = Common.getHost() + Common.OUTDOOR_URL();
             if (Common.isLogEnable()) {
                 Log.e("outdoorUrl", outdoorUrl);
             }
@@ -1850,7 +1850,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     private void drawIndoorLayer(String buildingId, String floorid) {
         if (indoorLayer == null) {
             indoorLayer = new LayerView(getContext());
-            String indoorUrl = String.format("%s/map-ugcv5-%s_%s_%s/rest/maps/%s_%s_%s", Common.getHost(), Common.parkId(), buildingId, floorid, Common.parkId(), buildingId, floorid);
+            String indoorUrl = Common.INDOOR_URL(buildingId, floorid);
             if (Common.isLogEnable()) {
                 Log.e("indoorUrl", indoorUrl);
             }
@@ -2907,7 +2907,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //            }
 //        }
 //        mapView.invalidate();
-//        renderCalculatedRoute(calculatedRoute);
+        renderCalculatedRoute(calculatedRoute);
         if (indoorCallback != null) {
             indoorCallback.done();
             indoorCallback = null;
@@ -3031,7 +3031,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //            }
 //        }
 //        mapView.invalidate();
-//        renderCalculatedRoute(calculatedRoute);
+        renderCalculatedRoute(calculatedRoute);
         if (indoorCallback != null) {
             indoorCallback.done();
             indoorCallback = null;
