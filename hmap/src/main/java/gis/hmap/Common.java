@@ -182,7 +182,6 @@ public class Common {
     }
 
     public static Logger getLogger(Context context) {
-
         if (_instance == null)
             _instance = new Common();
 
@@ -207,7 +206,6 @@ public class Common {
                 ex.printStackTrace();
             }
         }
-
         return _instance.logger;
     }
 
@@ -231,11 +229,12 @@ public class Common {
     }
 
     //室内地图
+    private static final String INDOOR_MAP = "/map-ugcv5-{workSpace}_{building}_{floor}/rest/maps/{workSpace}_{building}_{floor}";
     public static String INDOOR_URL(String buildingId, String floorid) {
         if (_instance == null)
             return "";
         else {
-            return String.format("%s/map-ugcv5-%s_%s_%s/rest/maps/%s_%s_%s", Common.getHost(), Common.parkId(), buildingId, floorid, Common.parkId(), buildingId, floorid);
+            return INDOOR_MAP.replace("{workSpace}", _instance.workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
         }
     }
 

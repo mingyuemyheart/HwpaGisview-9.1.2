@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -96,7 +97,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     protected List<HeatmapDrawable> heatmapList;
     protected HashMap<String, IndoorMapData> openIndoors;
     protected HashMap<String, QueryUtils.BasementMapResult> openBasements;
-    protected List<String> openedMaps;
+    protected List<String> indoorMaps;//存放室内地图对应buildingId及floorId，记录室内地图
     protected String currIndoorDetect = "";
     protected NetWorkAnalystUtil.CalculatedRoute calculatedRoute;
     protected String currIndoorMap = "";
@@ -347,7 +348,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         heatmapList = new ArrayList<>();
         openIndoors = new HashMap<>();
         openBasements = new HashMap<>();
-        openedMaps = new ArrayList<>();
+        indoorMaps = new ArrayList<>();
         defaultFacilities = new HashMap<>();
         mZoomToIndoorListener = null;
         mCalculateRouteListener = null;
@@ -912,14 +913,14 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                             ztie.buildingId = buildingId;
                             ztie.floorList = floorList;
                             ztie.floorId = "";
-                            for (String item : openedMaps) {
+                            for (String item : indoorMaps) {
                                 if (item.startsWith(buildingId)) {
                                     ztie.floorId = item.substring(item.indexOf(':')+1);
                                     break;
                                 }
                             }
                             if (TextUtils.isEmpty(ztie.floorId)) {
-                                for (String item : openedMaps) {
+                                for (String item : indoorMaps) {
                                     if (item.startsWith("Basement")) {
                                         ztie.floorId = item.substring(item.indexOf(':')+1);
                                         break;
@@ -1166,102 +1167,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
-    /**
-     * 加载地图
-     * @param zoom 地图缩放级别
-     * @param center 经纬度中心点
-     * @return
-     */
-    public boolean loadMap(int zoom, double[] center) {
-        queryWorkspace(center[1], center[0], loc -> mUIHandler.post(() -> {
-            if (loc != null && loc.length > 0) {
-                GeoLocation geoLocation = loc[0];
-                if (!TextUtils.isEmpty(geoLocation.address)) {
-                    String[] addr = geoLocation.address.split(",");
-                    if (Common.isLogEnable()) {
-                        Log.e("loadMap", geoLocation.address);
-                    }
-                    if (addr.length > 0) {
-                        if (!addr[0].equalsIgnoreCase(Common.parkId())) {
-                            if (autoClearCachedTiles) {
-                                clearMapCache();
-                            }
-                            destroyMap();
-                        }
-                        loadMap(zoom, center, addr[0], addr[0]);
-                    }
-                }
-            }
-        }));
-        return false;
-    }
 
-    /**
-     * 加载地图
-     * @param zoom 地图缩放级别
-     * @param center 经纬度中心点
-     * @param workspace 工作空间
-     * @param parkId 园区id
-     */
-    public void loadMap(int zoom, double[] center, String workspace, String parkId) {
-        loadMap(zoom, center, workspace, parkId, new ArrayList<>());
-    }
-
-    /**
-     * 加载地图
-     * @param zoom 地图缩放级别
-     * @param center 经纬度中心点
-     * @param workspace 工作空间
-     * @param parkId 园区id
-     * @param extParam 额外参数
-     */
-    public void loadMap(int zoom, double[] center, String workspace, String parkId, List<String> extParam) {
-        Common.setCurrentZone(workspace, parkId);
-        Common.setExtParam(extParam);
-        setZoom(center, zoom);
-        drawOutdoorLayer();
-    }
-
-    /**
-     * 绘制室外专题图层
-     */
-    private void drawOutdoorLayer() {
-        //栅格瓦片
-        if (outdoorLayer == null) {
-            outdoorLayer = new LayerView(getContext());
-            String outdoorUrl = Common.getHost() + Common.OUTDOOR_URL();
-            if (Common.isLogEnable()) {
-                Log.e("outdoorUrl", outdoorUrl);
-            }
-            outdoorLayer.setURL(outdoorUrl);
-            mapView.addLayer(outdoorLayer);
-
-            handler.sendEmptyMessage(Common.START_TIMER);
-            QueryUtils.queryAllBuildings("buildings@" + Common.parkId(), handler);
-        }
-
-//        //mvt矢量瓦片
-//        System.loadLibrary("lite");
-//        String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Supermap/Webcache/";
-//        RMGLCanvas rmglCanvas = new RMGLCanvas(getContext());
-//        rmglCanvas.CheckFile(getContext());
-//        rmglCanvas.openOnlineMVTServer("http://192.168.1.249:8090/iserver/services/map-ugcv5-B1_B01/rest/maps/B1_B01",sdcard+"/SuperMap/WebCache/");
-//        rmglCanvas.setScale(0.000457142857);
-//        rmglCanvas.setCenter(new com.supermap.imobilelite.data.Point2D(120.79,31.27));
-//        mapView.addGLLayer(rmglCanvas);
-//        mapView.refresh();
-    }
-
-    /**
-     * 清除室外地图专题图层
-     */
-    private void removeOutdoorLayer() {
-        if (outdoorLayer != null) {
-            mapView.removeLayer(outdoorLayer);
-            outdoorLayer.destroy();
-            outdoorLayer = null;
-        }
-    }
 
     public void setGlobalZone(String workspace, String datasource, String dataset) {
         Common.setGlobalZone(workspace, datasource, dataset);
@@ -1702,214 +1608,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 }
             }
         }
-    }
-
-
-    public static final String TYPE_NORMAL = "type_normal";//普通类型
-    public static final String TYPE_PARKING = "type_parking";//停车位类型
-
-    /**
-     * 绘制室内地图
-     * @param buildingId
-     * @param floorid
-     */
-    public void showIndoorMap(String buildingId, String floorid) {
-        showIndoorMap(buildingId, floorid, null);
-    }
-
-    /**
-     * 绘制室内地图
-     * @param buildingId
-     * @param floorid
-     */
-    public void showIndoorMap(String buildingId, String floorid, IndoorCallback callback) {
-        showIndoorMap(TYPE_NORMAL, buildingId, floorid, callback);
-    }
-
-    /**
-     * 绘制室内地图
-     * @param indoorType 室内地图样式，"type_normal";//普通类型   "type_parking";//停车位类型
-     * @param buildingId
-     * @param floorid
-     */
-    public void showIndoorMap(String indoorType, String buildingId, String floorid, IndoorCallback callback) {
-        removeIndoorLayer();
-        drawIndoorLayer(buildingId, floorid);
-
-        indoorCallback = callback;
-        Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap: buildingId=%s; floorid=%s", buildingId, floorid));
-        if (TextUtils.isEmpty(floorid)) {
-            clearOpensMap();
-            mapView.invalidate();
-        } else {
-            String realBuildingId = buildingId;
-
-            //转换之前需要完成的工作
-            String newIndoorMap;
-            if (TextUtils.isEmpty(realBuildingId))
-                newIndoorMap = "Basement:" + floorid;
-            else
-                newIndoorMap = realBuildingId + ":" + floorid;
-            Iterator<String> iterator = openedMaps.iterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().equalsIgnoreCase(newIndoorMap))
-                    return;
-            }
-            clearOpensMap();
-            currIndoorMap = newIndoorMap;
-            //转换之前需要完成的工作
-
-            BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorid);
-            if (data != null) {
-                realBuildingId = data.targetId;
-                Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap convert to: buildingId=%s; floorid=%s", realBuildingId, floorid));
-            }
-
-            if (TextUtils.equals(indoorType, TYPE_PARKING)) {//室内停车场
-//                QueryUtils.BasementMapResult basementMapResult = GisDataCache.getBasement(floorid);
-//                if (basementMapResult != null) {
-//                    Message msg = new Message();
-//                    msg.obj = basementMapResult;
-//                    msg.what = Common.QUERY_BASEMENT_MAP;
-//                    handler.sendMessage(msg);
-//                } else {
-                    QueryUtils.queryBasementMap(Common.parkId(), realBuildingId, floorid, handler);
-//                }
-            } else {//室内地图正常样式
-//                Feature buildingFeature = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getBuilding(realBuildingId);
-//                Feature[] floorFeatures = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getFloor(realBuildingId, floorid);
-//                if (floorFeatures != null && floorFeatures.length > 0 ) {
-//                    List<List<Point2D>> buildingGeometry = null;
-//                    if (buildingFeature != null && buildingFeature.geometry != null) {
-//                        buildingGeometry = new ArrayList<>();
-//                        int index = 0;
-//                        for (int i=0; i<buildingFeature.geometry.parts.length; i++) {
-//                            List<Point2D> point2DS = new ArrayList<>();
-//                            for (int j=0; j<buildingFeature.geometry.parts[i]; j++) {
-//                                Point2D point2D = new Point2D();
-//                                point2D.x = buildingFeature.geometry.points[index].x;
-//                                point2D.y = buildingFeature.geometry.points[index].y;
-//                                point2DS.add(point2D);
-//                                index++;
-//                            }
-//                            buildingGeometry.add(point2DS);
-//                        }
-//                    }
-//                    List<ModelData> rooms = new ArrayList<>();
-//                    for (Feature feature : floorFeatures) {
-//                        if (feature == null)
-//                            continue;
-//                        if (feature.geometry == null)
-//                            continue;
-//
-//                        HashMap<String, String> info = new HashMap<>();
-//                        for (int i=0; i<feature.fieldNames.length; i++)
-//                            info.put(feature.fieldNames[i], feature.fieldValues[i]);
-//                        info.put("FLOORID", floorid);
-//                        String key = String.format("%s.%s.%s", realBuildingId, floorid, info.get("SMID"));
-//                        List<List<Point2D>> geometry = new ArrayList<>();
-//                        int index = 0;
-//                        for (int i=0; i<feature.geometry.parts.length; i++) {
-//                            List<Point2D> point2DS = new ArrayList<>();
-//                            for (int j=0; j<feature.geometry.parts[i]; j++) {
-//                                Point2D point2D = new Point2D();
-//                                point2D.x = feature.geometry.points[index].x;
-//                                point2D.y = feature.geometry.points[index].y;
-//                                point2DS.add(point2D);
-//                                index++;
-//                            }
-//                            geometry.add(point2DS);
-//                        }
-//                        if (feature.geometry.type == GeometryType.REGION) {
-//                            ModelData room = new ModelData(key, null, geometry, info);
-//                            rooms.add(room);
-//                        } else {
-//                            ModelData room = new ModelData(key, geometry, null, info);
-//                            rooms.add(room);
-//                        }
-//                    }
-//                    IndoorMapData indoorMapData = new IndoorMapData(
-//                            realBuildingId,
-//                            floorid,
-//                            buildingGeometry,
-//                            buildingGeometry != null ? buildingFeature.geometry.getBounds() : null,
-//                            rooms);
-//                    Message msg = new Message();
-//                    msg.obj = indoorMapData;
-//                    msg.what = Common.QUERY_INDOOR_MAP;
-//                    handler.sendMessage(msg);
-//                } else
-                    QueryUtils.queryIndoorMap(Common.parkId() + ":Buildings", realBuildingId, floorid, handler);
-            }
-        }
-    }
-
-    /**
-     * 绘制室内专题图层
-     */
-    private void drawIndoorLayer(String buildingId, String floorid) {
-        if (indoorLayer == null) {
-            indoorLayer = new LayerView(getContext());
-            String indoorUrl = Common.INDOOR_URL(buildingId, floorid);
-            if (Common.isLogEnable()) {
-                Log.e("indoorUrl", indoorUrl);
-            }
-            indoorLayer.setURL(indoorUrl);
-            mapView.addLayer(indoorLayer);
-        }
-    }
-
-    /**
-     * 清除室内专题图层
-     */
-    public void removeIndoorLayer() {
-        if (indoorLayer != null) {
-            mapView.removeLayer(indoorLayer);
-            indoorLayer.destroy();
-            indoorLayer = null;
-        }
-    }
-
-    private void clearOpensMap() {
-        currIndoorMap = "";
-        openIndoors.clear();
-        openBasements.clear();
-        openedMaps.clear();
-        List<String> keys = new ArrayList<>();
-        for (Map.Entry<String, List<Overlay>> entry : namedOverlays.entrySet()) {
-            if (entry.getKey().startsWith("indoor[building:")) {
-                keys.add(entry.getKey());
-                List<Overlay> ovls = entry.getValue();
-                for (Overlay ov : ovls)
-                    mapView.getOverlays().remove(ov);
-            }
-        }
-        for (String key : keys)
-            namedOverlays.remove(key);
-
-        keys.clear();
-        for (Map.Entry<String, List<Overlay>> entry : namedOverlays.entrySet()) {
-            if (entry.getKey().startsWith("indoor[basement:")) {
-                keys.add(entry.getKey());
-                List<Overlay> ovls = entry.getValue();
-                for (Overlay ov : ovls)
-                    mapView.getOverlays().remove(ov);
-            }
-        }
-        for (String key : keys)
-            namedOverlays.remove(key);
-
-        keys.clear();
-        for (Map.Entry<String, List<Overlay>> entry : namedOverlays.entrySet()) {
-            if (entry.getKey().startsWith("indoorStyle[")) {
-                keys.add(entry.getKey());
-                List<Overlay> ovls = entry.getValue();
-                for (Overlay ov : ovls)
-                    mapView.getOverlays().remove(ov);
-            }
-        }
-        for (String key : keys)
-            namedOverlays.remove(key);
     }
 
     public void setRoomStyle(String buildingId, String floorId, String key, String type, RoomStyle roomStyle) {
@@ -2469,11 +2167,20 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         return QueryUtils.getObjects(dataset, filter);
     }
 
+    /**
+     * 注册building监听事件
+     * @param listener
+     */
     public void addBuildingListener(BuildingListener listener) {
-        if (!mBuildingListener.contains(listener))
+        if (!mBuildingListener.contains(listener)) {
             mBuildingListener.add(listener);
+        }
     }
 
+    /**
+     * 注销building监听事件
+     * @param listener
+     */
     public void removeBuildingListener(BuildingListener listener) {
         mBuildingListener.remove(listener);
         List<Overlay> overlays = mapView.getOverlays();
@@ -2710,10 +2417,11 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 case Common.START_TIMER:
                     host.handler.removeMessages(Common.START_TIMER);
                     MapController controller = host.mapView.getController();
-                    if (host.mapView.getZoomLevel() > host.maxZoomLevel)
+                    if (host.mapView.getZoomLevel() > host.maxZoomLevel) {
                         controller.setZoom(host.maxZoomLevel);
+                    }
                     host.fitMapWithNoBlank(host.mapView);
-                    if (host.isMapLoaded == false && host.mMapLoadedListener != null) {
+                    if (!host.isMapLoaded && host.mMapLoadedListener != null) {
                         if (host.mapView != null) {
                             double[] bounds = new double[4];
                             BoundingBox bx = host.mapView.getViewBounds();
@@ -2739,14 +2447,19 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         }
     }
 
+    /**
+     * building点击事件
+     * @param buildings
+     */
     private void initBuildingEvent(List<QueryUtils.BuildingResult> buildings) {
         this.buildings = buildings;
 
         List<Overlay> ovls;
         if (namedOverlays.containsKey(buildingTouchKey)) {
             ovls = namedOverlays.get(buildingTouchKey);
-            for (Overlay ov : ovls)
+            for (Overlay ov : ovls) {
                 mapView.getOverlays().remove(ov);
+            }
             ovls.clear();
         } else {
             ovls = new ArrayList<>();
@@ -2855,7 +2568,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //                pathBuild = combBuild;
 //        }
 //        if (canvas != null) {
-//            openedMaps.add(String.format("%s:%s", indoor.buildingId, indoor.floorId));
+//            indoorMaps.add(String.format("%s:%s", indoor.buildingId, indoor.floorId));
 //            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 //            paint.setColor(Color.parseColor("#D8D8D8"));
 //            paint.setAlpha(255);
@@ -2981,8 +2694,8 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //        }
 //        if (canvas != null) {
 //            String opnd = String.format("Basement:%s", basement.floorId);
-//            if (!openedMaps.contains(opnd))
-//                openedMaps.add(opnd);
+//            if (!indoorMaps.contains(opnd))
+//                indoorMaps.add(opnd);
 //            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 //            paint.setColor(Color.parseColor("#2F4F4F"));
 //            paint.setAlpha(255);
@@ -3369,4 +3082,348 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 
         return paint;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * 加载地图
+     * @param zoom 地图缩放级别
+     * @param center 经纬度中心点
+     * @return
+     */
+    public boolean loadMap(int zoom, double[] center) {
+        queryWorkspace(center[1], center[0], loc -> mUIHandler.post(() -> {
+            if (loc != null && loc.length > 0) {
+                GeoLocation geoLocation = loc[0];
+                if (!TextUtils.isEmpty(geoLocation.address)) {
+                    String[] addr = geoLocation.address.split(",");
+                    if (Common.isLogEnable()) {
+                        Log.e("loadMap", geoLocation.address);
+                    }
+                    if (addr.length > 0) {
+                        if (!addr[0].equalsIgnoreCase(Common.parkId())) {
+                            if (autoClearCachedTiles) {
+                                clearMapCache();
+                            }
+                            destroyMap();
+                        }
+                        loadMap(zoom, center, addr[0], addr[0]);
+                    }
+                }
+            } else {
+                if (Common.isLogEnable()) {
+                    mUIHandler.post(() -> Toast.makeText(getContext(), "所传经纬度不在地图范围内", Toast.LENGTH_SHORT).show());
+                }
+            }
+        }));
+        return false;
+    }
+
+    /**
+     * 加载地图
+     * @param zoom 地图缩放级别
+     * @param center 经纬度中心点
+     * @param workspace 工作空间
+     * @param parkId 园区id
+     */
+    public void loadMap(int zoom, double[] center, String workspace, String parkId) {
+        loadMap(zoom, center, workspace, parkId, new ArrayList<>());
+    }
+
+    /**
+     * 加载地图
+     * @param zoom 地图缩放级别
+     * @param center 经纬度中心点
+     * @param workspace 工作空间
+     * @param parkId 园区id
+     * @param extParam 额外参数
+     */
+    public void loadMap(int zoom, double[] center, String workspace, String parkId, List<String> extParam) {
+        Common.setCurrentZone(workspace, parkId);
+        Common.setExtParam(extParam);
+        setZoom(center, zoom);
+        drawOutdoorLayer();
+    }
+
+    /**
+     * 绘制室外地图
+     */
+    private void drawOutdoorLayer() {
+        //栅格瓦片
+        if (outdoorLayer == null) {
+            outdoorLayer = new LayerView(getContext());
+            String outdoorUrl = Common.getHost() + Common.OUTDOOR_URL();
+            if (Common.isLogEnable()) {
+                Log.e("outdoorUrl", outdoorUrl);
+            }
+            outdoorLayer.setURL(outdoorUrl);
+            mapView.addLayer(outdoorLayer);
+
+            //地图加载完成时间
+            handler.sendEmptyMessage(Common.START_TIMER);
+
+            QueryUtils.queryAllBuildings("buildings@" + Common.parkId(), handler);
+        }
+
+//        //mvt矢量瓦片
+//        System.loadLibrary("lite");
+//        String sdcard = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Supermap/Webcache/";
+//        RMGLCanvas rmglCanvas = new RMGLCanvas(getContext());
+//        rmglCanvas.CheckFile(getContext());
+//        rmglCanvas.openOnlineMVTServer("http://192.168.1.249:8090/iserver/services/map-ugcv5-B1_B01/rest/maps/B1_B01",sdcard+"/SuperMap/WebCache/");
+//        rmglCanvas.setScale(0.000457142857);
+//        rmglCanvas.setCenter(new com.supermap.imobilelite.data.Point2D(120.79,31.27));
+//        mapView.addGLLayer(rmglCanvas);
+//        mapView.refresh();
+    }
+
+    /**
+     * 清除室外地图
+     */
+    private void removeOutdoorLayer() {
+        if (outdoorLayer != null) {
+            mapView.removeLayer(outdoorLayer);
+            outdoorLayer.destroy();
+            outdoorLayer = null;
+        }
+    }
+
+
+    public static final String TYPE_NORMAL = "type_normal";//普通类型
+    public static final String TYPE_PARKING = "type_parking";//停车位类型
+    /**
+     * 绘制室内地图
+     * @param buildingId
+     * @param floorId
+     */
+    public void showIndoorMap(String buildingId, String floorId) {
+        showIndoorMap(buildingId, floorId, null);
+    }
+
+    /**
+     * 绘制室内地图
+     * @param buildingId
+     * @param floorId
+     */
+    public void showIndoorMap(String buildingId, String floorId, IndoorCallback callback) {
+        showIndoorMap(TYPE_NORMAL, buildingId, floorId, callback);
+    }
+
+    /**
+     * 绘制室内地图
+     * @param indoorType 室内地图样式，"type_normal";//普通类型   "type_parking";//停车位类型
+     * @param buildingId
+     * @param floorId
+     */
+    public void showIndoorMap(String indoorType, String buildingId, String floorId, IndoorCallback callback) {
+        removeIndoorLayer();
+        drawIndoorLayer(buildingId, floorId);
+
+        indoorCallback = callback;
+        Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap: buildingId=%s; floorid=%s", buildingId, floorId));
+        if (TextUtils.isEmpty(floorId)) {
+            clearOpensMap();
+            mapView.invalidate();
+        } else {
+            String realBuildingId = buildingId;
+
+            //转换之前需要完成的工作
+            String newIndoorMap;
+            if (TextUtils.isEmpty(realBuildingId)) {
+                newIndoorMap = "Basement:" + floorId;
+            } else {
+                newIndoorMap = realBuildingId + ":" + floorId;
+            }
+            Iterator<String> iterator = indoorMaps.iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().equalsIgnoreCase(newIndoorMap)) {
+                    return;
+                }
+            }
+            clearOpensMap();
+            currIndoorMap = newIndoorMap;
+            //转换之前需要完成的工作
+
+            BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorId);
+            if (data != null) {
+                realBuildingId = data.targetId;
+                Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap convert to: buildingId=%s; floorid=%s", realBuildingId, floorId));
+            }
+
+            if (TextUtils.equals(indoorType, TYPE_PARKING)) {//室内停车场
+//                QueryUtils.BasementMapResult basementMapResult = GisDataCache.getBasement(floorid);
+//                if (basementMapResult != null) {
+//                    Message msg = new Message();
+//                    msg.obj = basementMapResult;
+//                    msg.what = Common.QUERY_BASEMENT_MAP;
+//                    handler.sendMessage(msg);
+//                } else {
+                QueryUtils.queryBasementMap(Common.parkId(), realBuildingId, floorId, handler);
+//                }
+            } else {//室内地图正常样式
+//                Feature buildingFeature = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getBuilding(realBuildingId);
+//                Feature[] floorFeatures = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getFloor(realBuildingId, floorid);
+//                if (floorFeatures != null && floorFeatures.length > 0 ) {
+//                    List<List<Point2D>> buildingGeometry = null;
+//                    if (buildingFeature != null && buildingFeature.geometry != null) {
+//                        buildingGeometry = new ArrayList<>();
+//                        int index = 0;
+//                        for (int i=0; i<buildingFeature.geometry.parts.length; i++) {
+//                            List<Point2D> point2DS = new ArrayList<>();
+//                            for (int j=0; j<buildingFeature.geometry.parts[i]; j++) {
+//                                Point2D point2D = new Point2D();
+//                                point2D.x = buildingFeature.geometry.points[index].x;
+//                                point2D.y = buildingFeature.geometry.points[index].y;
+//                                point2DS.add(point2D);
+//                                index++;
+//                            }
+//                            buildingGeometry.add(point2DS);
+//                        }
+//                    }
+//                    List<ModelData> rooms = new ArrayList<>();
+//                    for (Feature feature : floorFeatures) {
+//                        if (feature == null)
+//                            continue;
+//                        if (feature.geometry == null)
+//                            continue;
+//
+//                        HashMap<String, String> info = new HashMap<>();
+//                        for (int i=0; i<feature.fieldNames.length; i++)
+//                            info.put(feature.fieldNames[i], feature.fieldValues[i]);
+//                        info.put("FLOORID", floorid);
+//                        String key = String.format("%s.%s.%s", realBuildingId, floorid, info.get("SMID"));
+//                        List<List<Point2D>> geometry = new ArrayList<>();
+//                        int index = 0;
+//                        for (int i=0; i<feature.geometry.parts.length; i++) {
+//                            List<Point2D> point2DS = new ArrayList<>();
+//                            for (int j=0; j<feature.geometry.parts[i]; j++) {
+//                                Point2D point2D = new Point2D();
+//                                point2D.x = feature.geometry.points[index].x;
+//                                point2D.y = feature.geometry.points[index].y;
+//                                point2DS.add(point2D);
+//                                index++;
+//                            }
+//                            geometry.add(point2DS);
+//                        }
+//                        if (feature.geometry.type == GeometryType.REGION) {
+//                            ModelData room = new ModelData(key, null, geometry, info);
+//                            rooms.add(room);
+//                        } else {
+//                            ModelData room = new ModelData(key, geometry, null, info);
+//                            rooms.add(room);
+//                        }
+//                    }
+//                    IndoorMapData indoorMapData = new IndoorMapData(
+//                            realBuildingId,
+//                            floorid,
+//                            buildingGeometry,
+//                            buildingGeometry != null ? buildingFeature.geometry.getBounds() : null,
+//                            rooms);
+//                    Message msg = new Message();
+//                    msg.obj = indoorMapData;
+//                    msg.what = Common.QUERY_INDOOR_MAP;
+//                    handler.sendMessage(msg);
+//                } else
+                QueryUtils.queryIndoorMap(Common.parkId() + ":Buildings", realBuildingId, floorId, handler);
+            }
+        }
+    }
+
+    /**
+     * 绘制室内地图
+     */
+    private void drawIndoorLayer(String buildingId, String floorId) {
+        if (indoorLayer == null) {
+            indoorLayer = new LayerView(getContext());
+            String indoorUrl = Common.getHost() + Common.INDOOR_URL(buildingId, floorId);
+            if (Common.isLogEnable()) {
+                Log.e("indoorUrl", indoorUrl);
+            }
+            indoorLayer.setURL(indoorUrl);
+            mapView.addLayer(indoorLayer);
+        }
+    }
+
+    /**
+     * 清除室内地图
+     */
+    public void removeIndoorLayer() {
+        if (indoorLayer != null) {
+            mapView.removeLayer(indoorLayer);
+            indoorLayer.destroy();
+            indoorLayer = null;
+        }
+    }
+
+    /**
+     * 清除地图数据
+     */
+    private void clearOpensMap() {
+        currIndoorMap = "";
+        openIndoors.clear();
+        openBasements.clear();
+        indoorMaps.clear();
+        List<String> keys = new ArrayList<>();
+        for (Map.Entry<String, List<Overlay>> entry : namedOverlays.entrySet()) {
+            if (entry.getKey().startsWith("indoor[building:")) {
+                keys.add(entry.getKey());
+                List<Overlay> ovls = entry.getValue();
+                for (Overlay ov : ovls) {
+                    mapView.getOverlays().remove(ov);
+                }
+            }
+        }
+        for (String key : keys) {
+            namedOverlays.remove(key);
+        }
+
+        keys.clear();
+        for (Map.Entry<String, List<Overlay>> entry : namedOverlays.entrySet()) {
+            if (entry.getKey().startsWith("indoor[basement:")) {
+                keys.add(entry.getKey());
+                List<Overlay> ovls = entry.getValue();
+                for (Overlay ov : ovls) {
+                    mapView.getOverlays().remove(ov);
+                }
+            }
+        }
+        for (String key : keys) {
+            namedOverlays.remove(key);
+        }
+
+        keys.clear();
+        for (Map.Entry<String, List<Overlay>> entry : namedOverlays.entrySet()) {
+            if (entry.getKey().startsWith("indoorStyle[")) {
+                keys.add(entry.getKey());
+                List<Overlay> ovls = entry.getValue();
+                for (Overlay ov : ovls) {
+                    mapView.getOverlays().remove(ov);
+                }
+            }
+        }
+
+        for (String key : keys) {
+            namedOverlays.remove(key);
+        }
+    }
+
 }
