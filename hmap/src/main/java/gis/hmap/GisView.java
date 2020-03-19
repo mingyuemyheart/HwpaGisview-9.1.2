@@ -2484,142 +2484,145 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @param indoor
      */
     private void renderIndoorMap(IndoorMapData indoor) {
-//        String indoorKey = String.format(indoorKeyTemplate, indoor.buildingId);
-//        List<Overlay> ovls = null;
-//        if (namedOverlays.containsKey(indoorKey)) {
-//            ovls = namedOverlays.get(indoorKey);
-//        }
-//
-//        Canvas canvas = null;
-//        Bitmap baseBmp = null;
-//        Path pathBuild = null;
-//        Path path = null;
-//        Path pathLine = null;
-//        double r = 0;
-//        Point2D leftTop = new Point2D();
-//        Point2D rightBottom = new Point2D();
-//        if (indoor.rooms != null && indoor.rooms.size() > 0) {
-//            int dw = mapView.getWidth();
-//            int dh = mapView.getHeight();
-//            leftTop = mapView.toMapPoint(new Point(0, 0));
-//            rightBottom = mapView.toMapPoint(new Point(dw, dh));
-//            if (leftTop == null || rightBottom == null)
-//                return;
-//            r = (double) dw / (rightBottom.x - leftTop.x);
-//            if (dw > 10 && dh > 10)
-//                baseBmp = Bitmap.createBitmap((int) dw, (int) dh, Bitmap.Config.ARGB_8888);
-//            if (baseBmp != null) {
-//                canvas = new Canvas(baseBmp);
-//                canvas.drawColor(Color.TRANSPARENT);
-//                path = new Path();
-//                pathLine = new Path();
-//            }
-//        }
-//
-//        if (indoor.buildingGeometry != null && indoor.buildingGeometry.size() > 0) {
-//            pathBuild = new Path();
-//            for (List<Point2D> obj : indoor.buildingGeometry) {
-//                double x, y;
-//                x = (obj.get(0).x - leftTop.x) * r;
-//                y = (leftTop.y - obj.get(0).y) * r;
-//                pathBuild.moveTo((float) x, (float) y);
-//                for (int i=1; i<obj.size(); i++) {
-//                    x = (obj.get(i).x - leftTop.x) * r;
-//                    y = (leftTop.y - obj.get(i).y) * r;
-//                    pathBuild.lineTo((float) x, (float) y);
-//                }
-//            }
-//        }
-//
-//        if (indoor.rooms != null && indoor.rooms.size() > 0) {
-//            Path combBuild = new Path();
-//            for (ModelData roomData : indoor.rooms) {
-//                double x, y;
-//                if (roomData.geometry != null) {
-//                    for (List<Point2D> obj : roomData.geometry) {
-//                        x = (obj.get(0).x - leftTop.x) * r;
-//                        y = (leftTop.y - obj.get(0).y) * r;
-//                        path.moveTo((float) x, (float) y);
-//                        if (pathBuild == null)
-//                            combBuild.moveTo((float) x, (float) y);
-//                        for (int i=1; i<obj.size(); i++) {
-//                            x = (obj.get(i).x - leftTop.x) * r;
-//                            y = (leftTop.y - obj.get(i).y) * r;
-//                            path.lineTo((float) x, (float) y);
-//                            if (pathBuild == null)
-//                                combBuild.lineTo((float) x, (float) y);
-//                        }
-//                    }
-//                }
-//                if (roomData.outline != null) {
-//                    for (List<Point2D> obj : roomData.outline) {
-//                        x = (obj.get(0).x - leftTop.x) * r;
-//                        y = (leftTop.y - obj.get(0).y) * r;
-//                        path.moveTo((float) x, (float) y);
-//                        for (int i=1; i<obj.size(); i++) {
-//                            x = (obj.get(i).x - leftTop.x) * r;
-//                            y = (leftTop.y - obj.get(i).y) * r;
-//                            path.lineTo((float) x, (float) y);
-//                        }
-//                    }
-//                }
-//            }
-//            if (pathBuild == null)
-//                pathBuild = combBuild;
-//        }
-//        if (canvas != null) {
-//            indoorMaps.add(String.format("%s:%s", indoor.buildingId, indoor.floorId));
-//            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//            paint.setColor(Color.parseColor("#D8D8D8"));
-//            paint.setAlpha(255);
-//            paint.setStyle(Paint.Style.FILL);
-//            paint.setStrokeWidth(1);
-//            canvas.drawPath(pathBuild, paint);
-//
-//            Paint linepaint = new Paint();
-//            linepaint.setAntiAlias(true);
-//            linepaint.setColor(Color.parseColor("#000000"));
-//            linepaint.setAlpha(128);
-//            linepaint.setStyle(Paint.Style.STROKE);
-//            linepaint.setStrokeWidth(1f);
-//            canvas.drawPath(pathLine, linepaint);
-//
-//            Paint rgnpaint = new Paint();
-//            rgnpaint.setAntiAlias(true);
-//            rgnpaint.setColor(Color.parseColor("#000000"));
-//            rgnpaint.setAlpha(255);
-//            rgnpaint.setStyle(Paint.Style.STROKE);
-//            rgnpaint.setStrokeWidth(1f);
-//            canvas.drawPath(path, rgnpaint);
-//
-//            if (ovls == null) {
-//                ovls = new ArrayList<>();
-//                namedOverlays.put(indoorKey, ovls);
-//            }
-//            boolean needNewOverlay = true;
-//            for (Overlay overlay : ovls) {
-//                if (overlay instanceof DrawableOverlay) {
-//                    needNewOverlay = false;
-//                    break;
-//                }
-//            }
-//            if (needNewOverlay) {
-//                DrawableOverlay floorOverlay = new DrawableOverlay();
-//                floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
-//                floorOverlay.setZIndex(indoorZIndex);
-//                ovls.add(floorOverlay);
-//                mapView.getOverlays().add(floorOverlay);
-//            } else {
-//                for (Overlay overlay : ovls) {
-//                    if (overlay instanceof DrawableOverlay) {
-//                        DrawableOverlay floorOverlay = (DrawableOverlay) overlay;
-//                        floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        mapView.invalidate();
+        if (!Common.isUGCV5()) {
+            String indoorKey = String.format(indoorKeyTemplate, indoor.buildingId);
+            List<Overlay> ovls = null;
+            if (namedOverlays.containsKey(indoorKey)) {
+                ovls = namedOverlays.get(indoorKey);
+            }
+
+            Canvas canvas = null;
+            Bitmap baseBmp = null;
+            Path pathBuild = null;
+            Path path = null;
+            Path pathLine = null;
+            double r = 0;
+            Point2D leftTop = new Point2D();
+            Point2D rightBottom = new Point2D();
+            if (indoor.rooms != null && indoor.rooms.size() > 0) {
+                int dw = mapView.getWidth();
+                int dh = mapView.getHeight();
+                leftTop = mapView.toMapPoint(new Point(0, 0));
+                rightBottom = mapView.toMapPoint(new Point(dw, dh));
+                if (leftTop == null || rightBottom == null)
+                    return;
+                r = (double) dw / (rightBottom.x - leftTop.x);
+                if (dw > 10 && dh > 10)
+                    baseBmp = Bitmap.createBitmap((int) dw, (int) dh, Bitmap.Config.ARGB_8888);
+                if (baseBmp != null) {
+                    canvas = new Canvas(baseBmp);
+                    canvas.drawColor(Color.TRANSPARENT);
+                    path = new Path();
+                    pathLine = new Path();
+                }
+            }
+
+            if (indoor.buildingGeometry != null && indoor.buildingGeometry.size() > 0) {
+                pathBuild = new Path();
+                for (List<Point2D> obj : indoor.buildingGeometry) {
+                    double x, y;
+                    x = (obj.get(0).x - leftTop.x) * r;
+                    y = (leftTop.y - obj.get(0).y) * r;
+                    pathBuild.moveTo((float) x, (float) y);
+                    for (int i=1; i<obj.size(); i++) {
+                        x = (obj.get(i).x - leftTop.x) * r;
+                        y = (leftTop.y - obj.get(i).y) * r;
+                        pathBuild.lineTo((float) x, (float) y);
+                    }
+                }
+            }
+
+            if (indoor.rooms != null && indoor.rooms.size() > 0) {
+                Path combBuild = new Path();
+                for (ModelData roomData : indoor.rooms) {
+                    double x, y;
+                    if (roomData.geometry != null) {
+                        for (List<Point2D> obj : roomData.geometry) {
+                            x = (obj.get(0).x - leftTop.x) * r;
+                            y = (leftTop.y - obj.get(0).y) * r;
+                            path.moveTo((float) x, (float) y);
+                            if (pathBuild == null)
+                                combBuild.moveTo((float) x, (float) y);
+                            for (int i=1; i<obj.size(); i++) {
+                                x = (obj.get(i).x - leftTop.x) * r;
+                                y = (leftTop.y - obj.get(i).y) * r;
+                                path.lineTo((float) x, (float) y);
+                                if (pathBuild == null)
+                                    combBuild.lineTo((float) x, (float) y);
+                            }
+                        }
+                    }
+                    if (roomData.outline != null) {
+                        for (List<Point2D> obj : roomData.outline) {
+                            x = (obj.get(0).x - leftTop.x) * r;
+                            y = (leftTop.y - obj.get(0).y) * r;
+                            path.moveTo((float) x, (float) y);
+                            for (int i=1; i<obj.size(); i++) {
+                                x = (obj.get(i).x - leftTop.x) * r;
+                                y = (leftTop.y - obj.get(i).y) * r;
+                                path.lineTo((float) x, (float) y);
+                            }
+                        }
+                    }
+                }
+                if (pathBuild == null)
+                    pathBuild = combBuild;
+            }
+            if (canvas != null) {
+                indoorMaps.add(String.format("%s:%s", indoor.buildingId, indoor.floorId));
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(Color.parseColor("#D8D8D8"));
+                paint.setAlpha(255);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setStrokeWidth(1);
+                canvas.drawPath(pathBuild, paint);
+
+                Paint linepaint = new Paint();
+                linepaint.setAntiAlias(true);
+                linepaint.setColor(Color.parseColor("#000000"));
+                linepaint.setAlpha(128);
+                linepaint.setStyle(Paint.Style.STROKE);
+                linepaint.setStrokeWidth(1f);
+                canvas.drawPath(pathLine, linepaint);
+
+                Paint rgnpaint = new Paint();
+                rgnpaint.setAntiAlias(true);
+                rgnpaint.setColor(Color.parseColor("#000000"));
+                rgnpaint.setAlpha(255);
+                rgnpaint.setStyle(Paint.Style.STROKE);
+                rgnpaint.setStrokeWidth(1f);
+                canvas.drawPath(path, rgnpaint);
+
+                if (ovls == null) {
+                    ovls = new ArrayList<>();
+                    namedOverlays.put(indoorKey, ovls);
+                }
+                boolean needNewOverlay = true;
+                for (Overlay overlay : ovls) {
+                    if (overlay instanceof DrawableOverlay) {
+                        needNewOverlay = false;
+                        break;
+                    }
+                }
+                if (needNewOverlay) {
+                    DrawableOverlay floorOverlay = new DrawableOverlay();
+                    floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
+                    floorOverlay.setZIndex(indoorZIndex);
+                    ovls.add(floorOverlay);
+                    mapView.getOverlays().add(floorOverlay);
+                } else {
+                    for (Overlay overlay : ovls) {
+                        if (overlay instanceof DrawableOverlay) {
+                            DrawableOverlay floorOverlay = (DrawableOverlay) overlay;
+                            floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
+                            break;
+                        }
+                    }
+                }
+            }
+            mapView.invalidate();
+        }
+
         renderCalculatedRoute(calculatedRoute);
         if (indoorCallback != null) {
             indoorCallback.done();
@@ -2632,118 +2635,121 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @param basement
      */
     private void renderBasementMap(QueryUtils.BasementMapResult basement) {
-//        String basementKey = String.format(basementKeyTemplate, basement.floorId);
-//        List<Overlay> ovls = null;
-//        if (namedOverlays.containsKey(basementKey)) {
-//            ovls = namedOverlays.get(basementKey);
-//        }
-//
-//        Canvas canvas = null;
-//        Bitmap baseBmp = null;
-//        Path pathStruct = null;
-//        Path path = null;
-//        double r = 0;
-//        Point2D leftTop = new Point2D();
-//        Point2D rightBottom = new Point2D();
-//        if ((basement.structureGeometry != null && basement.structureGeometry.size() > 0)
-//                ||(basement.floorGeometry != null && basement.floorGeometry.size() > 0)) {
-//            int dw = mapView.getWidth();
-//            int dh = mapView.getHeight();
-//            leftTop = mapView.toMapPoint(new Point(0, 0));
-//            rightBottom = mapView.toMapPoint(new Point(dw, dh));
-//            if (leftTop == null || rightBottom == null)
-//                return;
-//            r = (double) dw / (rightBottom.x - leftTop.x);
-////            Log.i("--basement", String.format("%d, %d; base: %f, %f", dw, dh, leftTop.x, leftTop.y));
-//            if (dw > 10 && dh > 10)
-//                baseBmp = Bitmap.createBitmap((int) dw, (int) dh, Bitmap.Config.ARGB_8888);
-//            if (baseBmp != null) {
-//                canvas = new Canvas(baseBmp);
-//                canvas.drawColor(Color.TRANSPARENT);
-//                pathStruct = new Path();
-//                path = new Path();
-//            }
-//        }
-//
-//        if (basement.structureGeometry != null && basement.structureGeometry.size() > 0) {
-//            for (List<Point2D> obj : basement.structureGeometry) {
-//                double x, y;
-//                x = (obj.get(0).x - leftTop.x) * r;
-//                y = (leftTop.y - obj.get(0).y) * r;
-//                pathStruct.moveTo((float) x, (float) y);
-//                for (int i=1; i<obj.size(); i++) {
-//                    x = (obj.get(i).x - leftTop.x) * r;
-//                    y = (leftTop.y - obj.get(i).y) * r;
-//                    pathStruct.lineTo((float) x, (float) y);
-//                }
-//            }
-//        }
-//
-//        if (basement.floorGeometry != null && basement.floorGeometry.size() > 0) {
-//            for (List<Point2D> obj : basement.floorGeometry) {
-//                double x, y;
-//                x = (obj.get(0).x - leftTop.x) * r;
-//                y = (leftTop.y - obj.get(0).y) * r;
-//                path.moveTo((float) x, (float) y);
-//                for (int i=1; i<obj.size(); i++) {
-//                    x = (obj.get(i).x - leftTop.x) * r;
-//                    y = (leftTop.y - obj.get(i).y) * r;
-//                    path.lineTo((float) x, (float) y);
-//                }
-//            }
-//        }
-//        if (canvas != null) {
-//            String opnd = String.format("Basement:%s", basement.floorId);
-//            if (!indoorMaps.contains(opnd))
-//                indoorMaps.add(opnd);
-//            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//            paint.setColor(Color.parseColor("#2F4F4F"));
-//            paint.setAlpha(255);
-//            paint.setStyle(Paint.Style.FILL);
-//            paint.setStrokeWidth(1f);
-//            canvas.drawPath(pathStruct, paint);
-//            paint.setColor(Color.parseColor("#5CE7FF"));
-//            paint.setStyle(Paint.Style.STROKE);
-//            canvas.drawPath(pathStruct, paint);
-//
-//            paint.setColor(Color.parseColor("#2F4F4F"));
-//            paint.setAlpha(255);
-//            paint.setStyle(Paint.Style.FILL);
-//            paint.setStrokeWidth(1f);
-//            canvas.drawPath(path, paint);
-//            paint.setColor(Color.parseColor("#5CE7FF"));
-//            paint.setStyle(Paint.Style.STROKE);
-//            canvas.drawPath(path, paint);
-//
-//            if (ovls == null) {
-//                ovls = new ArrayList<>();
-//                namedOverlays.put(basementKey, ovls);
-//            }
-//            boolean needNewOverlay = true;
-//            for (Overlay overlay : ovls) {
-//                if (overlay instanceof DrawableOverlay) {
-//                    needNewOverlay = false;
-//                    break;
-//                }
-//            }
-//            if (needNewOverlay) {
-//                DrawableOverlay floorOverlay = new DrawableOverlay();
-//                floorOverlay.setZIndex(parkingZIndex);
-//                floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
-//                ovls.add(floorOverlay);
-//                mapView.getOverlays().add(floorOverlay);
-//            } else {
-//                for (Overlay overlay : ovls) {
-//                    if (overlay instanceof DrawableOverlay) {
-//                        DrawableOverlay floorOverlay = (DrawableOverlay) overlay;
-//                        floorOverlay.setZIndex(parkingZIndex);
-//                        floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//        mapView.invalidate();
+        if (!Common.isUGCV5()) {
+            String basementKey = String.format(basementKeyTemplate, basement.floorId);
+            List<Overlay> ovls = null;
+            if (namedOverlays.containsKey(basementKey)) {
+                ovls = namedOverlays.get(basementKey);
+            }
+
+            Canvas canvas = null;
+            Bitmap baseBmp = null;
+            Path pathStruct = null;
+            Path path = null;
+            double r = 0;
+            Point2D leftTop = new Point2D();
+            Point2D rightBottom = new Point2D();
+            if ((basement.structureGeometry != null && basement.structureGeometry.size() > 0)
+                    ||(basement.floorGeometry != null && basement.floorGeometry.size() > 0)) {
+                int dw = mapView.getWidth();
+                int dh = mapView.getHeight();
+                leftTop = mapView.toMapPoint(new Point(0, 0));
+                rightBottom = mapView.toMapPoint(new Point(dw, dh));
+                if (leftTop == null || rightBottom == null)
+                    return;
+                r = (double) dw / (rightBottom.x - leftTop.x);
+//            Log.i("--basement", String.format("%d, %d; base: %f, %f", dw, dh, leftTop.x, leftTop.y));
+                if (dw > 10 && dh > 10)
+                    baseBmp = Bitmap.createBitmap((int) dw, (int) dh, Bitmap.Config.ARGB_8888);
+                if (baseBmp != null) {
+                    canvas = new Canvas(baseBmp);
+                    canvas.drawColor(Color.TRANSPARENT);
+                    pathStruct = new Path();
+                    path = new Path();
+                }
+            }
+
+            if (basement.structureGeometry != null && basement.structureGeometry.size() > 0) {
+                for (List<Point2D> obj : basement.structureGeometry) {
+                    double x, y;
+                    x = (obj.get(0).x - leftTop.x) * r;
+                    y = (leftTop.y - obj.get(0).y) * r;
+                    pathStruct.moveTo((float) x, (float) y);
+                    for (int i=1; i<obj.size(); i++) {
+                        x = (obj.get(i).x - leftTop.x) * r;
+                        y = (leftTop.y - obj.get(i).y) * r;
+                        pathStruct.lineTo((float) x, (float) y);
+                    }
+                }
+            }
+
+            if (basement.floorGeometry != null && basement.floorGeometry.size() > 0) {
+                for (List<Point2D> obj : basement.floorGeometry) {
+                    double x, y;
+                    x = (obj.get(0).x - leftTop.x) * r;
+                    y = (leftTop.y - obj.get(0).y) * r;
+                    path.moveTo((float) x, (float) y);
+                    for (int i=1; i<obj.size(); i++) {
+                        x = (obj.get(i).x - leftTop.x) * r;
+                        y = (leftTop.y - obj.get(i).y) * r;
+                        path.lineTo((float) x, (float) y);
+                    }
+                }
+            }
+            if (canvas != null) {
+                String opnd = String.format("Basement:%s", basement.floorId);
+                if (!indoorMaps.contains(opnd))
+                    indoorMaps.add(opnd);
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(Color.parseColor("#2F4F4F"));
+                paint.setAlpha(255);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setStrokeWidth(1f);
+                canvas.drawPath(pathStruct, paint);
+                paint.setColor(Color.parseColor("#5CE7FF"));
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawPath(pathStruct, paint);
+
+                paint.setColor(Color.parseColor("#2F4F4F"));
+                paint.setAlpha(255);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setStrokeWidth(1f);
+                canvas.drawPath(path, paint);
+                paint.setColor(Color.parseColor("#5CE7FF"));
+                paint.setStyle(Paint.Style.STROKE);
+                canvas.drawPath(path, paint);
+
+                if (ovls == null) {
+                    ovls = new ArrayList<>();
+                    namedOverlays.put(basementKey, ovls);
+                }
+                boolean needNewOverlay = true;
+                for (Overlay overlay : ovls) {
+                    if (overlay instanceof DrawableOverlay) {
+                        needNewOverlay = false;
+                        break;
+                    }
+                }
+                if (needNewOverlay) {
+                    DrawableOverlay floorOverlay = new DrawableOverlay();
+                    floorOverlay.setZIndex(parkingZIndex);
+                    floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
+                    ovls.add(floorOverlay);
+                    mapView.getOverlays().add(floorOverlay);
+                } else {
+                    for (Overlay overlay : ovls) {
+                        if (overlay instanceof DrawableOverlay) {
+                            DrawableOverlay floorOverlay = (DrawableOverlay) overlay;
+                            floorOverlay.setZIndex(parkingZIndex);
+                            floorOverlay.setDrawable(new BitmapDrawable(getResources(), baseBmp), new BoundingBox(leftTop, rightBottom));
+                            break;
+                        }
+                    }
+                }
+            }
+            mapView.invalidate();
+        }
+
         renderCalculatedRoute(calculatedRoute);
         if (indoorCallback != null) {
             indoorCallback.done();
@@ -3083,27 +3089,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         return paint;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * 加载地图
      * @param zoom 地图缩放级别
@@ -3116,9 +3101,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 GeoLocation geoLocation = loc[0];
                 if (!TextUtils.isEmpty(geoLocation.address)) {
                     String[] addr = geoLocation.address.split(",");
-                    if (Common.isLogEnable()) {
-                        Log.e("loadMap", geoLocation.address);
-                    }
                     if (addr.length > 0) {
                         if (!addr[0].equalsIgnoreCase(Common.parkId())) {
                             if (autoClearCachedTiles) {
@@ -3235,8 +3217,10 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @param floorId
      */
     public void showIndoorMap(String indoorType, String buildingId, String floorId, IndoorCallback callback) {
-        removeIndoorLayer();
-        drawIndoorLayer(buildingId, floorId);
+        if (Common.isUGCV5()) {
+            removeIndoorLayer();
+            drawIndoorLayer(buildingId, floorId);
+        }
 
         indoorCallback = callback;
         Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap: buildingId=%s; floorid=%s", buildingId, floorId));

@@ -25,9 +25,8 @@ import android.widget.Toast
 import com.supermap.imobilelite.maps.Point2D
 import gis.hmap.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlin.random.Random
 
-class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListener, GeoServiceCallback, IndoorCallback, ZoomToIndoorListener,
+class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener, GeoServiceCallback, IndoorCallback, ZoomToIndoorListener,
         CalculateRouteListener, MarkerListener, BuildingListener, ModelListener, ZoomListener, MapListener, LocationListener, QueryCallback,
         PathPlanDataListener {
 
@@ -86,6 +85,14 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
 
     private fun initMap() {
         Common.setLogEnable(true)
+
+//        Common.setUGCV5(false)
+//        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
+//        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
+
+        Common.setUGCV5(true)
+        GisView.setGisServer("http://192.168.1.249:8090/iserver/services")
+
         gisView.setMaxZoomLevel(18)
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
         gisView.setRouteFacility(
@@ -296,7 +303,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                 builder.setView(input)
                 builder.setPositiveButton("搜索") { dialog, which ->
                     val data = input.text.toString()
-                    gisView.getLocationOfAddress(data,  this@MainActivity2)  //位置搜索（模糊匹配）
+                    gisView.getLocationOfAddress(data,  this@MainActivity)  //位置搜索（模糊匹配）
                 }
                 builder.setNegativeButton("取消") { dialog, which -> dialog.cancel() }
                 builder.show()
@@ -570,7 +577,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
      * 绘制室内地图回调
      */
     override fun done() {
-        Toast.makeText(this@MainActivity2, "室内显示完成", Toast.LENGTH_LONG).show()
+        Toast.makeText(this@MainActivity, "室内显示完成", Toast.LENGTH_LONG).show()
     }
 
     /**
@@ -592,7 +599,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
     override fun calculateRouteEvent(event: RouteEvent?) {
         mUIHandler.post {
             val str = String.format("%s, 路径长度=%f", if (event!!.success) "成功" else "路径规划失败", event.totalLength)
-            Toast.makeText(this@MainActivity2, str, Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, str, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -607,7 +614,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
             Log.e("pathPlanDataSuccess", String.format("%s---%s", point.x, point.y))
         }
         mUIHandler.post {
-            Toast.makeText(this@MainActivity2, result, Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, result, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -616,7 +623,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
      */
     override fun pathPlanDataFailed(msg: String?) {
         mUIHandler.post {
-            Toast.makeText(this@MainActivity2, msg, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -691,7 +698,7 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
     override fun onQueryFinished(info: ObjectInfo?) {
         mUIHandler.post {
             val str = String.format("%s, (lng,lat)=%f, %f, NAME=%s", info!!.address, info.lng, info.lat, info.getStrParam("NAME"))
-            Toast.makeText(this@MainActivity2, str, Toast.LENGTH_LONG).show()
+            Toast.makeText(this@MainActivity, str, Toast.LENGTH_LONG).show()
         }
     }
 

@@ -25,6 +25,7 @@ import java.util.logging.SimpleFormatter;
 public class Common {
 
     private static Common _instance = null;
+
     private boolean logEnable = false;
     public static void setLogEnable(boolean enable) {
         if (_instance == null)
@@ -35,6 +36,19 @@ public class Common {
         if (_instance == null)
             _instance = new Common();
         return _instance.logEnable;
+    }
+
+    //判断工作空间是否为ugcv5格式
+    private boolean ugcv5 = false;
+    public static void setUGCV5(boolean isUGCV5) {
+        if (_instance == null)
+            _instance = new Common();
+        _instance.ugcv5 = isUGCV5;
+    }
+    public static boolean isUGCV5() {
+        if (_instance == null)
+            _instance = new Common();
+        return _instance.ugcv5;
     }
 
     private String host = "http://support.supermap.com.cn:8090/iserver/services";
@@ -210,12 +224,18 @@ public class Common {
     }
 
     //室外地图
-    private static final String OUTDOOR_MAP = "/map-ugcv5-{workSpace}/rest/maps/{parkId}";
+    private static final String OUTDOOR_MAP_MBTILES = "/map-{workSpace}/rest/maps/{parkId}";
+    private static final String OUTDOOR_MAP_UGCV5 = "/map-ugcv5-{workSpace}/rest/maps/{parkId}";
     public static String OUTDOOR_URL() {
         if (_instance == null)
             return "";
         else {
-            String url = OUTDOOR_MAP.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
+            String url;
+            if (isUGCV5()) {
+                url = OUTDOOR_MAP_UGCV5.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
+            } else {
+                url = OUTDOOR_MAP_MBTILES.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
+            }
             if (_instance.extParam.size() > 0) {
                for (int i=0; i<_instance.extParam.size(); i++) {
                    if (i == 0)
@@ -229,22 +249,37 @@ public class Common {
     }
 
     //室内地图
-    private static final String INDOOR_MAP = "/map-ugcv5-{workSpace}_{building}_{floor}/rest/maps/{workSpace}_{building}_{floor}";
+    private static final String INDOOR_MAP_MBTILES = "/map-{workSpace}_{building}_{floor}/rest/maps/{workSpace}_{building}_{floor}";
+    private static final String INDOOR_MAP_UGCV5 = "/map-ugcv5-{workSpace}_{building}_{floor}/rest/maps/{workSpace}_{building}_{floor}";
     public static String INDOOR_URL(String buildingId, String floorid) {
         if (_instance == null)
             return "";
         else {
-            return INDOOR_MAP.replace("{workSpace}", _instance.workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
+            String url;
+            if (isUGCV5()) {
+                url = INDOOR_MAP_UGCV5.replace("{workSpace}", _instance.workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
+            } else {
+                url = INDOOR_MAP_MBTILES.replace("{workSpace}", _instance.workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
+            }
+            return url;
         }
     }
 
     //
-    private static final String BACK_MAP = "/map-ugcv5-{workSpace}/rest/maps/common";
+    private static final String BACK_MAP_MBTILES = "/map-{workSpace}/rest/maps/common";
+    private static final String BACK_MAP_UGCV5 = "/map-ugcv5-{workSpace}/rest/maps/common";
     public static String BACKMAP_URL() {
-        if (_instance == null)
+        if (_instance == null) {
             return "";
-        else
-            return BACK_MAP.replace("{workSpace}", _instance.workSpace);
+        } else {
+            String url;
+            if (isUGCV5()) {
+                url = BACK_MAP_UGCV5.replace("{workSpace}", _instance.workSpace);
+            } else {
+                url = BACK_MAP_MBTILES.replace("{workSpace}", _instance.workSpace);
+            }
+            return url;
+        }
     }
 
     //查询数据
