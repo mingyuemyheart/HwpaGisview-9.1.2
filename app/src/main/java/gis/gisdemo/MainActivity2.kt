@@ -467,6 +467,14 @@ class MainActivity2 : Activity(), NavigationView.OnNavigationItemSelectedListene
                                 Color.parseColor("#FFFFFF"),
                                 "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
                         ps)
+//                gisView.calcRoutePath(
+//                        RoutePoint(doubleArrayOf(22.658302, 114.058105),
+//                                Color.parseColor("#F20216"),
+//                                "", "", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+//                        RoutePoint(doubleArrayOf(22.65751540660858, 114.05779480934143),
+//                                Color.parseColor("#F20216"),
+//                                "", "", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+//                        ps)
             }
             R.id.clearRoute -> {
                 gisView.clearPath()
