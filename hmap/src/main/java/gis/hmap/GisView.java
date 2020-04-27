@@ -397,10 +397,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
         mapView.destroy();
     }
 
-    public static void setGisServer(String gisUrl) {
-        Common.CreateInstance(gisUrl);
-    }
-
     public void setRTLSServer(String rtlsUrl) {
         Common.initRtlsLicenseHost(rtlsUrl);
     }
@@ -586,7 +582,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             String ret = "[]";
             try {
                 //获取HWYQ数据
-                String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getHost(),Common.GEO_DECODE_HWYQURL(), lng, lat, radius, count);
+                String url = String.format("%s%s?x=%s&y=%s&geoDecodingRadius=%s&fromIndex=0&toIndex=9999&maxReturn=%s", Common.getInputHost(), Common.GEO_DECODE_HWYQURL(), lng, lat, radius, count);
                 if (Common.isLogEnable()) {
                     Log.e("switchWorkspace", url);
                 }
@@ -3090,6 +3086,14 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     }
 
     /**
+     * 设置gisServer地址
+     * @param gisUrl
+     */
+    public static void setGisServer(String gisUrl) {
+        Common.CreateInputHost(gisUrl);
+    }
+
+    /**
      * 加载地图
      * @param zoom 地图缩放级别
      * @param center 经纬度中心点
@@ -3102,12 +3106,6 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 if (!TextUtils.isEmpty(geoLocation.address)) {
                     String[] addr = geoLocation.address.split(",");
                     if (addr.length > 0) {
-                        if (!addr[0].equalsIgnoreCase(Common.parkId())) {
-                            if (autoClearCachedTiles) {
-                                clearMapCache();
-                            }
-                            destroyMap();
-                        }
                         loadMap(zoom, center, addr[0], addr[0]);
                     }
                 }
@@ -3121,6 +3119,13 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     }
 
     /**
+     * 切换数据服务，获取真实的GisServer地址和园区信息
+     */
+    private void switchService(SwithServiceListener callback) {
+        GisDataCache.swithService(callback);
+    }
+
+    /**
      * 加载地图
      * @param zoom 地图缩放级别
      * @param center 经纬度中心点
@@ -3128,6 +3133,38 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @param parkId 园区id
      */
     public void loadMap(int zoom, double[] center, String workspace, String parkId) {
+        switchService(new SwithServiceListener() {
+            @Override
+            public void switchServiceSuccess(SwithServiceData data) {
+                if (Common.isLogEnable()) {
+                    Log.e("switchServiceSuccess", data.gisServer+","+data.parkId+","+data.mapType);
+                }
+                mUIHandler.post(() -> {
+                    Common.setUGCV5(TextUtils.equals(data.mapType, "ugcv5"));
+                    Common.CreateInstance(TextUtils.isEmpty(data.gisServer) ? Common.getInputHost() : data.gisServer);
+                    switchServiceResult(zoom, center, data.parkId, data.parkId);
+                });
+            }
+            @Override
+            public void switchServiceFailed() {
+                if (Common.isLogEnable()) {
+                    Log.e("switchServiceFailed", "switchServiceFailed");
+                }
+                mUIHandler.post(() -> {
+                    Common.CreateInstance(Common.getInputHost());
+                    switchServiceResult(zoom, center, workspace, parkId);
+                });
+            }
+        });
+    }
+
+    private void switchServiceResult(int zoom, double[] center, String workspace, String parkId) {
+        if (!parkId.equalsIgnoreCase(Common.parkId())) {
+            if (autoClearCachedTiles) {
+                clearMapCache();
+            }
+            destroyMap();
+        }
         loadMap(zoom, center, workspace, parkId, new ArrayList<>());
     }
 

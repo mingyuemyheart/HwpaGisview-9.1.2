@@ -52,6 +52,7 @@ public class Common {
     }
 
     private String host = "http://support.supermap.com.cn:8090/iserver/services";
+    private String inputHost = "http://support.supermap.com.cn:8090/iserver/services";
     private String rtlsLicenseHost = "https://10.240.155.52:18889";
     private String workSpace = "china400";
     private String parkId = "China";
@@ -73,6 +74,13 @@ public class Common {
         _instance.host = gisUrl;
     }
 
+    public static void CreateInputHost(String gisUrl) {
+        if (_instance == null)
+            _instance = new Common();
+
+        _instance.inputHost = gisUrl;
+    }
+
     public static void initRtlsLicenseHost(String rtlsUrl) {
         if (_instance == null)
             _instance = new Common();
@@ -85,6 +93,13 @@ public class Common {
             _instance = new Common();
 
         return _instance.host;
+    }
+
+    public static String getInputHost() {
+        if (_instance == null)
+            _instance = new Common();
+
+        return _instance.inputHost;
     }
 
     public static String getRtlsLicenseSrv() {

@@ -84,15 +84,6 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
     }
 
     private fun initMap() {
-        Common.setLogEnable(true)
-
-//        Common.setUGCV5(false)
-//        GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
-//        GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
-
-        Common.setUGCV5(true)
-        GisView.setGisServer("http://192.168.1.249:8090/iserver/services")
-
         gisView.setMaxZoomLevel(18)
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
         gisView.setRouteFacility(
@@ -118,7 +109,9 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
 
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
         when(p0.itemId) {
-            R.id.loadMap -> gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
+            R.id.loadMap -> {
+                gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
+            }
             R.id.setCenter -> {
                 gisView.setCenter(22.656049, 114.057771)
                 Toast.makeText(this, String.format("中心：%s, %s", gisView.center[0], gisView.center[1]), Toast.LENGTH_SHORT).show()
@@ -388,7 +381,7 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
                     roomStyle.fillOpacity = 128
                     roomStyle.textColor = Color.WHITE
                     roomStyle.isShowText = true
-                    gisView.setRoomStyle("J01", "F01", "1L45R", roomStyle)
+                    gisView.setRoomStyle("J01", "F01", "1L43R", roomStyle)
                 }
             }
             R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L45R", null)

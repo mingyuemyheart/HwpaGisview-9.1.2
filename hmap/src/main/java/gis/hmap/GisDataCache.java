@@ -69,6 +69,29 @@ final class GisDataCache {
     }
 
     /**
+     * 获取真实地址和园区信息
+     * @param callback
+     */
+    public static void swithService(final SwithServiceListener callback) {
+        Common.fixedThreadPool.execute(() -> {
+            if (callback != null) {
+                Feature[] features = QueryUtils.querySwitchService();
+                if (features != null && features.length > 0) {
+                    for (int i = 0; i < features.length; i++) {
+                        SwithServiceData data = new SwithServiceData(features[i]);
+                        if (Common.getInputHost().startsWith(data.inputUrl)) {
+                            callback.switchServiceSuccess(data);
+                            break;
+                        }
+                    }
+                } else {
+                    callback.switchServiceFailed();
+                }
+            }
+        });
+    }
+
+    /**
      * 获取ivas数据
      * @param test
      * @param callback
