@@ -3137,12 +3137,12 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             @Override
             public void switchServiceSuccess(SwithServiceData data) {
                 if (Common.isLogEnable()) {
-                    Log.e("switchServiceSuccess", data.gisServer+","+data.parkId+","+data.mapType);
+                    Log.e("switchServiceSuccess", data.gisServer+","+data.workSpace+","+data.parkId+","+data.mapType);
                 }
                 mUIHandler.post(() -> {
                     Common.setUGCV5(TextUtils.equals(data.mapType, "ugcv5"));
                     Common.CreateInstance(TextUtils.isEmpty(data.gisServer) ? Common.getInputHost() : data.gisServer);
-                    switchServiceResult(zoom, center, data.parkId, data.parkId);
+                    switchServiceResult(zoom, center, data.workSpace, data.parkId);
                 });
             }
             @Override

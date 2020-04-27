@@ -246,10 +246,12 @@ public class Common {
             return "";
         else {
             String url;
+            //单独适配areaJ--HWYQ_J对应的工作空间
+            String workSpace = TextUtils.equals(_instance.workSpace, "areaJ") ? _instance.parkId : _instance.workSpace;
             if (isUGCV5()) {
-                url = OUTDOOR_MAP_UGCV5.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
+                url = OUTDOOR_MAP_UGCV5.replace("{workSpace}", workSpace).replace("{parkId}", _instance.parkId);
             } else {
-                url = OUTDOOR_MAP_MBTILES.replace("{workSpace}", _instance.workSpace).replace("{parkId}", _instance.parkId);
+                url = OUTDOOR_MAP_MBTILES.replace("{workSpace}", workSpace).replace("{parkId}", _instance.parkId);
             }
             if (_instance.extParam.size() > 0) {
                for (int i=0; i<_instance.extParam.size(); i++) {
@@ -271,10 +273,12 @@ public class Common {
             return "";
         else {
             String url;
+            //单独适配areaJ--HWYQ_J对应的工作空间
+            String workSpace = TextUtils.equals(_instance.workSpace, "areaJ") ? _instance.parkId : _instance.workSpace;
             if (isUGCV5()) {
-                url = INDOOR_MAP_UGCV5.replace("{workSpace}", _instance.workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
+                url = INDOOR_MAP_UGCV5.replace("{workSpace}", workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
             } else {
-                url = INDOOR_MAP_MBTILES.replace("{workSpace}", _instance.workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
+                url = INDOOR_MAP_MBTILES.replace("{workSpace}", workSpace).replace("{building}", buildingId).replace("{floor}", floorid);
             }
             return url;
         }

@@ -384,7 +384,7 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
                     gisView.setRoomStyle("J01", "F01", "1L43R", roomStyle)
                 }
             }
-            R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L45R", null)
+            R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L43R", null)
             R.id.typestyle -> {
                 gisView.showIndoorMap("J01", "F01") {
                     val roomStyle = RoomStyle()

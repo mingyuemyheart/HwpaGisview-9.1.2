@@ -9,6 +9,7 @@ public class SwithServiceData {
 
     public double lat;
     public double lng;
+    public String workSpace;
     public String parkId;
     public String gisServer;
     public String mapType;
@@ -21,6 +22,8 @@ public class SwithServiceData {
                 lng = Double.parseDouble(feature.fieldValues[i]);
             else if (feature.fieldNames[i].equalsIgnoreCase("SMY"))
                 lat = Double.parseDouble(feature.fieldValues[i]);
+            else if (feature.fieldNames[i].equalsIgnoreCase("WORKSPACE"))
+                workSpace = feature.fieldValues[i];
             else if (feature.fieldNames[i].equalsIgnoreCase("PARKID"))
                 parkId = feature.fieldValues[i];
             else if (feature.fieldNames[i].equalsIgnoreCase("URL"))
