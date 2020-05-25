@@ -86,6 +86,7 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
     private fun initMap() {
         gisView.setMaxZoomLevel(18)
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
+//        gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771), "BTYQ", "BTYQ")
         gisView.setRouteFacility(
                 arrayOf("Lift", "InOut"),
                 arrayOf(GeneralMarker(null, null, resources.getDrawable(R.drawable.elevator, null), 32, 32, null),

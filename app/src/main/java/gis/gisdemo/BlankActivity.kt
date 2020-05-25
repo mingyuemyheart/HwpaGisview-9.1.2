@@ -21,13 +21,13 @@ class BlankActivity : Activity() {
         btnTest.setOnClickListener {
             startActivity(Intent(this@BlankActivity, MainActivity::class.java))
             Common.setUGCV5(false)
-            GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为平安园区
+            GisView.setGisServer("http://mcloud-uat.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为测试环境
         }
 
         btnProduce.setOnClickListener {
             startActivity(Intent(this@BlankActivity, MainActivity::class.java))
             Common.setUGCV5(false)
-            GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//生产环境
+            GisView.setGisServer("http://w3m.huawei.com/mcloud/mag/FreeProxyForText/BTYQ_json")//华为生产环境
         }
 
         btnWA.setOnClickListener {
