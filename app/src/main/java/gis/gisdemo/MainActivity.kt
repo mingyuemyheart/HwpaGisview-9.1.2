@@ -138,6 +138,7 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
                 //参数二不设置回调对象，需要设置默认开启的室内楼层
 //            gisView.setSwitchIndoor(4, null, "F1");
                 //参数三设置回调对象，默认楼层参数被忽略，回调参数含有buildingId，可自行处理显示室内或其他效果
+                gisView.addZoomListener(this)
                 gisView.setSwitchIndoor(4, this, "")
                 Toast.makeText(this, "显示室内级别=4时，成功", Toast.LENGTH_SHORT).show()
             }
