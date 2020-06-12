@@ -8,6 +8,7 @@ public class BuildingConvertMappingData {
     public String buildingId;
     public String[] floorList;
     public String targetId;
+    public String roomCode;
 
     public BuildingConvertMappingData(Feature feature) {
         for (int i=0; i<feature.fieldNames.length; i++) {
@@ -21,6 +22,8 @@ public class BuildingConvertMappingData {
                 floorList = feature.fieldValues[i].split(",");
             else if (feature.fieldNames[i].equalsIgnoreCase("BASEMENTBUILDINGID"))
                 targetId = feature.fieldValues[i];
+            else if (feature.fieldNames[i].equalsIgnoreCase("ROOMCODE"))
+                roomCode = feature.fieldValues[i];
         }
     }
 }

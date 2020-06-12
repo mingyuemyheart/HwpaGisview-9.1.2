@@ -86,6 +86,7 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
     private fun initMap() {
         gisView.setMaxZoomLevel(18)
         gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771))
+//        gisView.loadMap(4, doubleArrayOf(31.26, 121.63), "SYS", "SYS")//上研所
 //        gisView.loadMap(4, doubleArrayOf(22.656049, 114.057771), "BTYQ", "BTYQ")
         gisView.setRouteFacility(
                 arrayOf("Lift", "InOut"),
@@ -374,29 +375,49 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
             R.id.loadF3 -> gisView.showIndoorMap("J01", "F03", this)
             R.id.removeLayer -> gisView.removeIndoorLayer()
             R.id.roomstyle -> {
-                gisView.showIndoorMap("J01", "F01") {
-                    val roomStyle = RoomStyle()
-                    roomStyle.lineColor = Color.parseColor("#909000")
-                    roomStyle.lineOpacity = 150
-                    roomStyle.lineWidth = 2
-                    roomStyle.fillColor = Color.parseColor("#009090")
-                    roomStyle.fillOpacity = 128
-                    roomStyle.textColor = Color.WHITE
-                    roomStyle.isShowText = true
-                    gisView.setRoomStyle("J01", "F01", "1L43R", roomStyle)
-                }
+                gisView.showIndoorMap("J01", "F01", object : IndoorCallback {
+                    override fun indoorSuccess(roomCode: String?) {
+                        val roomStyle = RoomStyle()
+                        roomStyle.lineColor = Color.parseColor("#909000")
+                        roomStyle.lineOpacity = 150
+                        roomStyle.lineWidth = 2
+                        roomStyle.fillColor = Color.parseColor("#009090")
+                        roomStyle.fillOpacity = 128
+                        roomStyle.textColor = Color.WHITE
+                        roomStyle.isShowText = true
+                        gisView.setRoomStyle("J01", "F01", "1L43R", roomStyle)
+                    }
+
+                    override fun done() {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun indoorSuccess(indoorMapData: IndoorMapData?) {
+                        TODO("Not yet implemented")
+                    }
+                })
             }
             R.id.delroomstyle -> gisView.setRoomStyle("J01", "F01", "1L43R", null)
             R.id.typestyle -> {
-                gisView.showIndoorMap("J01", "F01") {
-                    val roomStyle = RoomStyle()
-                    roomStyle.lineColor = Color.parseColor("#ff0000")
-                    roomStyle.lineOpacity = 150
-                    roomStyle.lineWidth = 2
-                    roomStyle.fillColor = Color.parseColor("#ff9090")
-                    roomStyle.fillOpacity = 128
-                    gisView.setRoomStyle("J01", "F01", "家具", "TYPE", roomStyle)
-                }
+                gisView.showIndoorMap("J01", "F01", object : IndoorCallback {
+                    override fun indoorSuccess(roomCode: String?) {
+                        val roomStyle = RoomStyle()
+                        roomStyle.lineColor = Color.parseColor("#ff0000")
+                        roomStyle.lineOpacity = 150
+                        roomStyle.lineWidth = 2
+                        roomStyle.fillColor = Color.parseColor("#ff9090")
+                        roomStyle.fillOpacity = 128
+                        gisView.setRoomStyle("J01", "F01", "家具", "TYPE", roomStyle)
+                    }
+
+                    override fun done() {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun indoorSuccess(indoorMapData: IndoorMapData?) {
+                        TODO("Not yet implemented")
+                    }
+                })
             }
             R.id.deltypestyle -> {
                 gisView.showIndoorMap("J01", "F01", this)
@@ -456,7 +477,6 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
             R.id.caclRoute -> {
                 gisView.showIndoorMap("J01", "F01", this)
                 gisView.addRouteListener(this)
-
                 val ps = PresentationStyle()
                 ps.opacity = 120
                 ps.fillColor = Color.parseColor("#02D6F2")
@@ -469,13 +489,35 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
                                 Color.parseColor("#FFFFFF"),
                                 "J01", "F01", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
                         ps)
+
+//                gisView.showIndoorMap("M1", "F01GHJ", this)//上研所
+//                gisView.addRouteListener(this)
+//                val ps = PresentationStyle()
+//                ps.opacity = 120
+//                ps.fillColor = Color.parseColor("#02D6F2")
+//                ps.lineWidth = 20
 //                gisView.calcRoutePath(
-//                        RoutePoint(doubleArrayOf(22.658302, 114.058105),
-//                                Color.parseColor("#F20216"),
-//                                "", "", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
-//                        RoutePoint(doubleArrayOf(22.65751540660858, 114.05779480934143),
-//                                Color.parseColor("#F20216"),
-//                                "", "", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+//                        RoutePoint(doubleArrayOf(31.265692, 121.626816),
+//                                Color.parseColor("#FFFFFF"),
+//                                "M1", "F01GHJ", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+//                        RoutePoint(doubleArrayOf(31.265125, 121.62882),
+//                                Color.parseColor("#FFFFFF"),
+//                                "M1", "F01GHJ", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
+//                        ps)
+
+//                gisView.showIndoorMap("M1", "F01ABC", this)//上研所
+//                gisView.addRouteListener(this)
+//                val ps = PresentationStyle()
+//                ps.opacity = 120
+//                ps.fillColor = Color.parseColor("#02D6F2")
+//                ps.lineWidth = 20
+//                gisView.calcRoutePath(
+//                        RoutePoint(doubleArrayOf(31.264448, 121.62231),
+//                                Color.parseColor("#FFFFFF"),
+//                                "M1", "F01ABC", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_1), 64, 64),
+//                        RoutePoint(doubleArrayOf(31.264442, 121.62195),
+//                                Color.parseColor("#FFFFFF"),
+//                                "M1", "F01DEF", 20, 100, ContextCompat.getDrawable(this, R.drawable.marker_3), 64, 64), arrayOf(),
 //                        ps)
             }
             R.id.clearRoute -> {
@@ -569,10 +611,18 @@ class MainActivity : Activity(), NavigationView.OnNavigationItemSelectedListener
     }
 
     /**
-     * 绘制室内地图回调
+     * 调用室内地图回调
      */
+    override fun indoorSuccess(roomCode: String?) {
+        Toast.makeText(this@MainActivity, "室内显示完成,roomCode=$roomCode", Toast.LENGTH_LONG).show()
+    }
+
+    override fun indoorSuccess(indoorMapData: IndoorMapData?) {
+        //indoorMapData为室内数据
+    }
+
     override fun done() {
-        Toast.makeText(this@MainActivity, "室内显示完成", Toast.LENGTH_LONG).show()
+        //废弃，使用indoorSuccess方法替代
     }
 
     /**

@@ -36,6 +36,12 @@ class BlankActivity : Activity() {
             GisView.setGisServer("http://192.168.1.101:8090/iserver/services")
         }
 
+        btnSYS.setOnClickListener {
+            startActivity(Intent(this@BlankActivity, MainActivity::class.java))
+            Common.setUGCV5(false)
+            GisView.setGisServer("http://192.168.1.247:8090/iserver/services")
+        }
+
 //        GisView.setLocDecoder(false, object : IVASMappingListener {
 //            override fun onIVASMappingSuccess(iVasMapping: MutableMap<String, IVASMappingData>?) {
 //                mUIHandler.post {

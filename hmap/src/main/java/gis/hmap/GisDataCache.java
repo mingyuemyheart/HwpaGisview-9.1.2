@@ -498,7 +498,7 @@ final class GisDataCache {
         }
 
         if (structureGeometry != null || floorGeometry != null) {
-            result = new QueryUtils.BasementMapResult(key, structureGeometry, structureBounds, floorGeometry);
+            result = new QueryUtils.BasementMapResult(key, "", structureGeometry, structureBounds, floorGeometry);
         }
         long t2 = (new Date()).getTime();
         Log.i("-->", String.format("read %s: %d", key, t2-t1));

@@ -12,13 +12,15 @@ import java.util.List;
 public class IndoorMapData {
     public String buildingId;
     public String floorId;
+    public String roomCode;
     public List<List<Point2D>> buildingGeometry;
     public Rectangle2D buildingBounds;
     public List<ModelData> rooms;
 
-    public IndoorMapData(String buildingId, String floorId, List<List<Point2D>> buildingGeometry, Rectangle2D buildingBounds, List<ModelData> rooms) {
+    public IndoorMapData(String buildingId, String floorId, String roomCode, List<List<Point2D>> buildingGeometry, Rectangle2D buildingBounds, List<ModelData> rooms) {
         this.buildingId = buildingId;
         this.floorId = floorId;
+        this.roomCode = roomCode;
         this.buildingGeometry = buildingGeometry;
         this.buildingBounds = buildingBounds;
         this.rooms = rooms;

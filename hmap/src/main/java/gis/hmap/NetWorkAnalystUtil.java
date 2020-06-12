@@ -67,6 +67,23 @@ class NetWorkAnalystUtil {
         private PresentationStyle ps;
 
         public PathServiceRunnable(MapView mapView, RoutePoint start, RoutePoint end, RoutePoint[] way, PresentationStyle ps, Handler handler) {
+            //适配上研所SYS独有格式
+            if (!TextUtils.isEmpty(start.floorid) && !TextUtils.isEmpty(end.floorid)) {
+                if (start.floorid.endsWith("ABC")) {
+                    end.floorid = start.floorid.replace("ABC", "ABC");
+                    end.floorid = start.floorid.replace("DEF", "ABC");
+                    end.floorid = start.floorid.replace("GHJ", "ABC");
+                } else if (start.floorid.endsWith("DEF")) {
+                    end.floorid = start.floorid.replace("ABC", "DEF");
+                    end.floorid = start.floorid.replace("DEF", "DEF");
+                    end.floorid = start.floorid.replace("GHJ", "DEF");
+                } else if (start.floorid.endsWith("GHJ")) {
+                    end.floorid = start.floorid.replace("ABC", "GHJ");
+                    end.floorid = start.floorid.replace("DEF", "GHJ");
+                    end.floorid = start.floorid.replace("GHJ", "GHJ");
+                }
+            }
+
             BoundingBox boundingBox = mapView.getBounds();
             nodes = new ArrayList<>();
             if (start != null && start.coords != null && start.coords.length >= 2) {

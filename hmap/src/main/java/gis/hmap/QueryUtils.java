@@ -102,20 +102,22 @@ class QueryUtils {
      * @param florid
      * @param handler
      */
-    public static void queryIndoorMap(String mapId, String buildingId, String florid, Handler handler) {
-        new Thread(new QueryIndoorMapRunnable(mapId, buildingId, florid, handler)).start();
+    public static void queryIndoorMap(String mapId, String buildingId, String florid, String roomCode, Handler handler) {
+        new Thread(new QueryIndoorMapRunnable(mapId, buildingId, florid, roomCode, handler)).start();
     }
 
     private static class QueryIndoorMapRunnable implements Runnable {
         String mapId;
         String buildingId;
         String florid;
+        String roomCode;
         Handler handler;
 
-        public QueryIndoorMapRunnable(String mapId, String buildingId, String florid, Handler handler) {
+        public QueryIndoorMapRunnable(String mapId, String buildingId, String florid, String roomCode, Handler handler) {
             this.mapId = mapId;
             this.buildingId = buildingId;
             this.florid = florid;
+            this.roomCode = roomCode;
             this.handler = handler;
         }
 
@@ -259,7 +261,7 @@ class QueryUtils {
             }
 
             if (buildingGeometry != null || rooms != null) {
-                IndoorMapData data = new IndoorMapData(buildingId, florid, buildingGeometry, buildingBounds, rooms);
+                IndoorMapData data = new IndoorMapData(buildingId, florid, roomCode, buildingGeometry, buildingBounds, rooms);
                 Message msg = new Message();
                 msg.obj = data;
                 msg.what = Common.QUERY_INDOOR_MAP;
@@ -271,12 +273,14 @@ class QueryUtils {
 
     public static class BasementMapResult implements Serializable {
         public String floorId;
+        public String roomCode;
         public List<List<Point2D>> structureGeometry;
         public List<List<Point2D>> floorGeometry;
         public Rectangle2D structureBounds;
 
-        public BasementMapResult(String floorId, List<List<Point2D>> structureGeometry, Rectangle2D structureBounds, List<List<Point2D>> floorGeometry) {
+        public BasementMapResult(String floorId, String roomCode, List<List<Point2D>> structureGeometry, Rectangle2D structureBounds, List<List<Point2D>> floorGeometry) {
             this.floorId = floorId;
+            this.roomCode = roomCode;
             this.structureGeometry = structureGeometry;
             this.floorGeometry = floorGeometry;
             this.structureBounds = structureBounds;
@@ -290,20 +294,22 @@ class QueryUtils {
      * @param florid
      * @param handler
      */
-    public static void queryBasementMap(String mapId, String buildingId, String florid, Handler handler) {
-        new Thread(new QueryBasementMapRunnable(mapId, buildingId, florid, handler)).start();
+    public static void queryBasementMap(String mapId, String buildingId, String florid, String roomCode, Handler handler) {
+        new Thread(new QueryBasementMapRunnable(mapId, buildingId, florid, roomCode, handler)).start();
     }
 
     private static class QueryBasementMapRunnable implements Runnable {
         String mapId;
         String buildingId;
         String florid;
+        String roomCode;
         Handler handler;
 
-        public QueryBasementMapRunnable(String mapId, String buildingId, String florid, Handler handler) {
+        public QueryBasementMapRunnable(String mapId, String buildingId, String florid, String roomCode, Handler handler) {
             this.mapId = mapId;
             this.buildingId = buildingId;
             this.florid = florid;
+            this.roomCode = roomCode;
             this.handler = handler;
         }
 
@@ -401,7 +407,7 @@ class QueryUtils {
             }
 
             if (structureGeometry != null || floorGeometry != null) {
-                BasementMapResult data = new BasementMapResult(florid, structureGeometry, structureBounds, floorGeometry);
+                BasementMapResult data = new BasementMapResult(florid, roomCode, structureGeometry, structureBounds, floorGeometry);
                 Message msg = new Message();
                 msg.obj = data;
                 msg.what = Common.QUERY_BASEMENT_MAP;
@@ -516,12 +522,14 @@ class QueryUtils {
         public List<PresentationStyle> highlightStyle;
         public List<List<Point2D>> normalGeometry;
         public PresentationStyle normalStyle;
+        public String roomCode;
 
-        public ModelResult(List<List<Point2D>> highlightGeometry, List<PresentationStyle> highlightStyle, List<List<Point2D>> normalGeometry, PresentationStyle normalStyle) {
+        public ModelResult(List<List<Point2D>> highlightGeometry, List<PresentationStyle> highlightStyle, List<List<Point2D>> normalGeometry, PresentationStyle normalStyle, String roomCode) {
             this.highlightGeometry = highlightGeometry;
             this.highlightStyle = highlightStyle;
             this.normalGeometry = normalGeometry;
             this.normalStyle = normalStyle;
+            this.roomCode = roomCode;
         }
     }
 
@@ -534,22 +542,24 @@ class QueryUtils {
      * @param normal
      * @param handler
      */
-    public static void queryModel(List<String[]> modIds, String buildingId, String floorid, List<PresentationStyle> pss, PresentationStyle normal, Handler handler) {
-        new Thread(new QueryModelRunnable(modIds, buildingId, floorid, pss, normal, handler)).start();
+    public static void queryModel(List<String[]> modIds, String buildingId, String floorid, String roomCode, List<PresentationStyle> pss, PresentationStyle normal, Handler handler) {
+        new Thread(new QueryModelRunnable(modIds, buildingId, floorid, roomCode, pss, normal, handler)).start();
     }
 
     private static class QueryModelRunnable implements Runnable {
         private List<String[]> modIds;
         private String buildingId;
         private String floorid;
+        private String roomCode;
         private List<PresentationStyle> pss;
         private PresentationStyle normal;
         private Handler handler;
 
-        public QueryModelRunnable(List<String[]> modIds, String buildingId, String floorid, List<PresentationStyle> pss, PresentationStyle normal, Handler handler) {
+        public QueryModelRunnable(List<String[]> modIds, String buildingId, String floorid, String roomCode, List<PresentationStyle> pss, PresentationStyle normal, Handler handler) {
             this.modIds = modIds;
             this.buildingId = buildingId;
             this.floorid = floorid;
+            this.roomCode = roomCode;
             this.pss = pss;
             this.normal = normal;
             this.handler = handler;
@@ -637,7 +647,7 @@ class QueryUtils {
             }
 
             if (highlightGeometry != null || normalGeometry != null) {
-                ModelResult data = new ModelResult(highlightGeometry, highlightStyle, normalGeometry, normal);
+                ModelResult data = new ModelResult(highlightGeometry, highlightStyle, normalGeometry, normal, roomCode);
                 Message msg = new Message();
                 msg.obj = data;
                 msg.what = Common.QUERY_MODEL;

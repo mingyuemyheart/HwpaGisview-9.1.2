@@ -5,5 +5,8 @@ package gis.hmap;
  */
 
 public interface IndoorCallback {
-    void done();
+    @Deprecated
+    void done();//建议使用indoorSuccess
+    void indoorSuccess(String roomCode);//长编码
+    void indoorSuccess(IndoorMapData indoorMapData);//室内数据
 }

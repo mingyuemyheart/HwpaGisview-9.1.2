@@ -47,6 +47,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -1991,11 +1992,13 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
     public void showModelHighlight(List<String[]> modIds, String buildingId, String floorid, List<PresentationStyle> pss, PresentationStyle normal) {
         isShowHighLight = true;
         String realBuildingId = buildingId;
+        String roomCode = "";
         BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorid);
         if (data != null) {
+            roomCode = data.roomCode;
             realBuildingId = data.targetId;
         }
-        QueryUtils.queryModel(modIds, realBuildingId, floorid, pss, normal, handler);
+        QueryUtils.queryModel(modIds, realBuildingId, floorid, roomCode, pss, normal, handler);
     }
 
     /**
@@ -2621,6 +2624,14 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 
         renderCalculatedRoute(calculatedRoute);
         if (indoorCallback != null) {
+            if (!TextUtils.isEmpty(indoor.roomCode)) {
+                if (Common.isLogEnable()) {
+                    Log.e("roomCode", indoor.roomCode+"-"+indoor.floorId);
+                }
+                indoorCallback.indoorSuccess(indoor.roomCode+"-"+indoor.floorId);
+            } else {
+                indoorCallback.indoorSuccess("");
+            }
             indoorCallback.done();
             indoorCallback = null;
         }
@@ -2748,6 +2759,14 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 
         renderCalculatedRoute(calculatedRoute);
         if (indoorCallback != null) {
+            if (!TextUtils.isEmpty(basement.roomCode)) {
+                if (Common.isLogEnable()) {
+                    Log.e("roomCode", basement.roomCode+"-"+basement.floorId);
+                }
+                indoorCallback.indoorSuccess(basement.roomCode+"-"+basement.floorId);
+            } else {
+                indoorCallback.indoorSuccess("");
+            }
             indoorCallback.done();
             indoorCallback = null;
         }
@@ -3012,6 +3031,9 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
      * @param model
      */
     private void renderModel(QueryUtils.ModelResult model) {
+        if (!TextUtils.isEmpty(model.roomCode)) {
+            Log.e("roomCode", model.roomCode);
+        }
         List<Overlay> ovls;
         if (namedOverlays.containsKey(modelsKey)) {
             ovls = namedOverlays.get(modelsKey);
@@ -3285,7 +3307,9 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
             //转换之前需要完成的工作
 
             BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), this.mMapCacheListener).getBuidingConver(buildingId, floorId);
+            String roomCode = "";
             if (data != null) {
+                roomCode = data.roomCode;
                 realBuildingId = data.targetId;
                 Common.getLogger(null).log(Level.INFO, String.format("showIndoorMap convert to: buildingId=%s; floorid=%s", realBuildingId, floorId));
             }
@@ -3298,7 +3322,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //                    msg.what = Common.QUERY_BASEMENT_MAP;
 //                    handler.sendMessage(msg);
 //                } else {
-                QueryUtils.queryBasementMap(Common.parkId(), realBuildingId, floorId, handler);
+                QueryUtils.queryBasementMap(Common.parkId(), realBuildingId, floorId, roomCode, handler);
 //                }
             } else {//室内地图正常样式
 //                Feature buildingFeature = GisDataCache.getInstance(this.getContext(), this.mMapCacheListener).getBuilding(realBuildingId);
@@ -3364,7 +3388,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //                    msg.what = Common.QUERY_INDOOR_MAP;
 //                    handler.sendMessage(msg);
 //                } else
-                QueryUtils.queryIndoorMap(Common.parkId() + ":Buildings", realBuildingId, floorId, handler);
+                QueryUtils.queryIndoorMap(Common.parkId() + ":Buildings", realBuildingId, floorId, roomCode, handler);
             }
         }
     }
