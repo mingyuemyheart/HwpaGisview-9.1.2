@@ -2633,6 +2633,7 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
                 indoorCallback.indoorSuccess("");
             }
             indoorCallback.done();
+            indoorCallback.indoorSuccess(indoor);
             indoorCallback = null;
         }
     }
@@ -3235,6 +3236,14 @@ public class GisView extends RelativeLayout implements Overlay.OverlayTapListene
 //        rmglCanvas.setCenter(new com.supermap.imobilelite.data.Point2D(120.79,31.27));
 //        mapView.addGLLayer(rmglCanvas);
 //        mapView.refresh();
+    }
+
+    /**
+     * 该方法必须在loadMap以后调用
+     */
+    public BuildingConvertMappingData getBuildingInfo(String roomCode) {
+        BuildingConvertMappingData data = GisDataCache.getInstance(getContext(), mMapCacheListener).getBuidingConver(roomCode);
+        return data;
     }
 
     /**

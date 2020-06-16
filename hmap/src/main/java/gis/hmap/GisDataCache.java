@@ -138,9 +138,14 @@ final class GisDataCache {
         }
     }
 
+    /**
+     * 通过buildingId和floorId获取building信息
+     * @param buildingId
+     * @param floorId
+     * @return
+     */
     public BuildingConvertMappingData getBuidingConver(String buildingId, String floorId) {
         BuildingConvertMappingData result = null;
-
         if (buildingMapping != null) {
             for (BuildingConvertMappingData data : buildingMapping) {
                 if (data.buildingId.equalsIgnoreCase(buildingId)) {
@@ -158,8 +163,42 @@ final class GisDataCache {
                 }
             }
         }
-
         return result;
+    }
+
+    /**
+     * 通过长编码获取building信息（虚拟园区使用，如上研所SYS）
+     * @param roomCode 长编码CN-31-001-M-M1-B01GHJ
+     * @return
+     */
+    public BuildingConvertMappingData getBuidingConver(String roomCode) {
+        if (roomCode.contains("-")) {
+            String[] array = roomCode.split("-");
+            roomCode = roomCode.replace(roomCode.substring(roomCode.lastIndexOf("-")), "");
+            String buildingId = array[array.length-2];
+            String floorId = array[array.length-1];
+            BuildingConvertMappingData result = null;
+            if (buildingMapping != null) {
+                for (BuildingConvertMappingData data : buildingMapping) {
+                    if (data.roomCode.equalsIgnoreCase(roomCode) && data.buildingId.equalsIgnoreCase(buildingId)) {
+                        boolean exist = false;
+                        for (String floor : data.floorList) {
+                            if (floor.equalsIgnoreCase(floorId)) {
+                                exist = true;
+                                break;
+                            }
+                        }
+                        if (exist) {
+                            result = data;
+                            break;
+                        }
+                    }
+                }
+            }
+            return result;
+        } else {
+            return null;
+        }
     }
 
     public void initIndoorMaps(List<QueryUtils.BuildingResult> buildings) {

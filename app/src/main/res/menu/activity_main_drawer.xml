@@ -11,6 +11,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="加载地图" />
         <item
+            android:id="@+id/loadBuilding"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="获取building信息" />
+        <item
             android:id="@+id/setCenter"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="设置地图中心" />
